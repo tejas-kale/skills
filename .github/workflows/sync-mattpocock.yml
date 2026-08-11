@@ -1,0 +1,71 @@
+name: Sync mattpocock/skills
+
+on:
+  schedule:
+    # Weekdays mid-day UTC — checks for a new upstream release
+    - cron: "0 14 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Upstream tag/ref to sync (default: latest release)"
+        required: false
+        type: string
+      force:
+        description: "Re-run sync even when the pin already matches"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-mattpocock-skills
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync upstream skills
+        id: sync
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MATTPCOCK_SKILLS_REF: ${{ inputs.ref }}
+          FORCE_SYNC: ${{ github.event_name == 'workflow_dispatch' && inputs.force && '1' || '' }}
+        run: bash scripts/sync-mattpocock.sh
+
+      - name: Open or update pull request
+        if: steps.sync.outputs.synced == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/sync-mattpocock-skills
+          delete-branch: true
+          commit-message: "chore: sync mattpocock/skills to ${{ steps.sync.outputs.version }}"
+          title: "chore: sync mattpocock/skills@${{ steps.sync.outputs.version }}"
+          body: |
+            Automated sync of [mattpocock/skills](https://github.com/mattpocock/skills) into this repo.
+
+            - **Previous pin:** `${{ steps.sync.outputs.previous }}`
+            - **New pin:** `${{ steps.sync.outputs.version }}`
+            - **Merge conflicts reported by sync script:** `${{ steps.sync.outputs.conflicts }}`
+
+            Release notes: https://github.com/mattpocock/skills/releases/tag/${{ steps.sync.outputs.version }}
+
+            ## Review checklist
+
+            - [ ] Skim the diff under `skills/` (especially files you have customized in place)
+            - [ ] Resolve any conflict markers if `conflicts > 0`
+            - [ ] Confirm `skills/local/` was not touched
+            - [ ] Confirm `.upstream/mattpocock-version` matches the release you want
