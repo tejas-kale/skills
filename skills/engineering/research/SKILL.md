@@ -3,7 +3,7 @@ name: research
 description: Investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo. Use when the user wants a topic researched, docs or API facts gathered, or reading legwork delegated to a background agent.
 ---
 
-Spin up a **background agent** to do the research, so you keep working while it reads.
+Spin up a **background agent** to do the research, so you keep working while it reads. On the spawn, set `model` (or the harness equivalent) to that harness's **mid-tier** — Claude Code `sonnet`, Codex its terra/scan tier, Cursor a `*-fast` slug; otherwise the provider's mid-tier or fast alias. If you are already the research agent, execute the job below yourself.
 
 Its job:
 
