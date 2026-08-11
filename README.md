@@ -13,13 +13,14 @@ skills/
   deprecated/
   local/           # skills authored here only — never overwritten by sync
 .upstream/
-  mattpocock-version   # pinned upstream release tag
-  mattpocock/          # pristine mirror used as the 3-way merge base
+  mattpocock-version   # pinned upstream release tag (merge base is fetched from this tag)
 scripts/
   sync-mattpocock.sh
 .github/workflows/
   sync-mattpocock.yml
 ```
+
+Matt’s skills live **once**, under `skills/`. The pin file is only a version pointer — sync fetches that tag from GitHub when it needs a merge base.
 
 ## Usage
 
@@ -46,25 +47,25 @@ Add brand-new skills only under `skills/local/`.
 
 ## Upstream sync
 
-This repo pins a release of `mattpocock/skills` in `.upstream/mattpocock-version` (currently checked in at import time).
+Pinned release: `.upstream/mattpocock-version`.
 
 CI (`.github/workflows/sync-mattpocock.yml`):
 
-- Runs on weekdays and via **Actions → Sync mattpocock/skills → Run workflow**
-- Fetches the latest upstream release (or a ref you pass in)
-- 3-way merges into `skills/`, preserving your in-place edits
-- Refreshes `.upstream/mattpocock/` as the new merge base
-- Opens a PR on branch `chore/sync-mattpocock-skills` for review
+- Runs **once a week** (and via **Actions → Sync mattpocock/skills → Run workflow**)
+- **Exits with no PR** unless the latest upstream release differs from the pin
+- 3-way merges into `skills/` (base = pinned tag, ours = your tree, theirs = new tag)
+- Opens/updates `chore/sync-mattpocock-skills` with a PR body that includes:
+  - file-level change summary (added / updated / merged / removed)
+  - explicit **merge conflicts to resolve** (paths + what to do)
+  - upstream release notes for the new tag
 
 Manual sync locally:
 
 ```bash
 bash scripts/sync-mattpocock.sh
-# or pin a specific tag:
+# optional: sync to a specific newer tag
 MATTPCOCK_SKILLS_REF=v1.2.3 bash scripts/sync-mattpocock.sh
 ```
-
-If both you and upstream changed the same hunk, the sync script leaves conflict markers in the file and reports `conflicts > 0` on the PR — resolve those before merging.
 
 ## License
 

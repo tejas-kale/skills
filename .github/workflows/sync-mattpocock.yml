@@ -2,19 +2,14 @@ name: Sync mattpocock/skills
 
 on:
   schedule:
-    # Weekdays mid-day UTC — checks for a new upstream release
-    - cron: "0 14 * * 1-5"
+    # Once a week (Monday 14:00 UTC). No-ops unless the pin differs from latest release.
+    - cron: "0 14 * * 1"
   workflow_dispatch:
     inputs:
       ref:
-        description: "Upstream tag/ref to sync (default: latest release)"
+        description: "Optional upstream tag to sync to (default: latest release). Still no-ops if it matches the pin."
         required: false
         type: string
-      force:
-        description: "Re-run sync even when the pin already matches"
-        required: false
-        type: boolean
-        default: false
 
 permissions:
   contents: write
@@ -43,7 +38,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           MATTPCOCK_SKILLS_REF: ${{ inputs.ref }}
-          FORCE_SYNC: ${{ github.event_name == 'workflow_dispatch' && inputs.force && '1' || '' }}
+          PR_BODY_FILE: .github/sync-pr-body.md
         run: bash scripts/sync-mattpocock.sh
 
       - name: Open or update pull request
@@ -54,18 +49,4 @@ jobs:
           delete-branch: true
           commit-message: "chore: sync mattpocock/skills to ${{ steps.sync.outputs.version }}"
           title: "chore: sync mattpocock/skills@${{ steps.sync.outputs.version }}"
-          body: |
-            Automated sync of [mattpocock/skills](https://github.com/mattpocock/skills) into this repo.
-
-            - **Previous pin:** `${{ steps.sync.outputs.previous }}`
-            - **New pin:** `${{ steps.sync.outputs.version }}`
-            - **Merge conflicts reported by sync script:** `${{ steps.sync.outputs.conflicts }}`
-
-            Release notes: https://github.com/mattpocock/skills/releases/tag/${{ steps.sync.outputs.version }}
-
-            ## Review checklist
-
-            - [ ] Skim the diff under `skills/` (especially files you have customized in place)
-            - [ ] Resolve any conflict markers if `conflicts > 0`
-            - [ ] Confirm `skills/local/` was not touched
-            - [ ] Confirm `.upstream/mattpocock-version` matches the release you want
+          body-path: .github/sync-pr-body.md
