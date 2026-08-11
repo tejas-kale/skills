@@ -1,0 +1,52 @@
+name: Sync mattpocock/skills
+
+on:
+  schedule:
+    # Once a week (Monday 14:00 UTC). No-ops unless the pin differs from latest release.
+    - cron: "0 14 * * 1"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Optional upstream tag to sync to (default: latest release). Still no-ops if it matches the pin."
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-mattpocock-skills
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync upstream skills
+        id: sync
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MATTPCOCK_SKILLS_REF: ${{ inputs.ref }}
+          PR_BODY_FILE: .github/sync-pr-body.md
+        run: bash scripts/sync-mattpocock.sh
+
+      - name: Open or update pull request
+        if: steps.sync.outputs.synced == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/sync-mattpocock-skills
+          delete-branch: true
+          commit-message: "chore: sync mattpocock/skills to ${{ steps.sync.outputs.version }}"
+          title: "chore: sync mattpocock/skills@${{ steps.sync.outputs.version }}"
+          body-path: .github/sync-pr-body.md
