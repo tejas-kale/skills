@@ -11,4 +11,5 @@ Upstream sync never modifies this directory.
 | `doom-literate-config` | Change a Doom Emacs literate `config.org` setup without losing tangled state |
 | `german-shopping-receipts` | Query the `german_shopping_receipts` BigQuery table with `bq` |
 | `macos-disk-cleanup` | Triage and reclaim disk space on macOS |
+| `show-me` | Explain the current topic visually (imported from [humanlayer/skills](https://github.com/humanlayer/skills/blob/main/plugins/show-me/skills/show-me/SKILL.md)) |
 | `workers-best-practices` | Author and review Cloudflare Workers code against production rules |
