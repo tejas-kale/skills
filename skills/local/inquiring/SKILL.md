@@ -7,7 +7,7 @@ Interview the user until you share a reading of a **question** — what the evid
 
 Work the tree in **rounds**. The **frontier** is every claim whose prerequisites are already settled — the questions you can ask _now_ without guessing at answers you haven't heard yet. Fill what you can from evidence first; ask the user only what the evidence cannot settle. Then wait.
 
-Finding evidence is your job, never the user's. Dispatch a `/research` agent (or equivalent lookup) for a large primary-source hunt — don't block the rest of the frontier on it. The _reading_ is the user's: put each unsettled interpretation to them and wait.
+Finding evidence is your job, never the user's. Dispatch a `/research` agent (or equivalent lookup) for a large primary-source hunt — don't block the rest of the frontier on it. The _reading_ is the user's: put each unsettled interpretation to them and wait. Stress-test operationalizations, sample bias, and leaps from chart to conclusion. If the user's prior survives the evidence, record it as settled with that evidence.
 
 If a **decision** appears ("what should we do?"), name it and hand it to `/grilling`. Stay on claims.
 
