@@ -8,6 +8,8 @@ Upstream sync never modifies this directory.
 
 | Skill | Purpose |
 | --- | --- |
+| `inquire-me` | User-invoked entry: run an `/inquiring` session |
+| `inquiring` | Shared understanding of a problem through a claim tree of evidence |
 | `doom-literate-config` | Change a Doom Emacs literate `config.org` setup without losing tangled state |
 | `german-shopping-receipts` | Query the `german_shopping_receipts` BigQuery table with `bq` |
 | `macos-disk-cleanup` | Triage and reclaim disk space on macOS |
