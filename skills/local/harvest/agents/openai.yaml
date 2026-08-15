@@ -1,0 +1,5 @@
+interface:
+  display_name: "Harvest"
+  short_description: "Harvest session lessons into project memory"
+policy:
+  allow_implicit_invocation: false
