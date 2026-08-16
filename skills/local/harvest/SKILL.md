@@ -80,7 +80,7 @@ A lesson is a candidate only if **all** hold:
 
 - **Would-have-shortened** — present at session start, this session would have needed fewer prompts or iterations.
 - **Evidenced** — conversation (including recovered transcript) and artifacts agree, **or** the user explicitly corrected the agent.
-- **Not already recorded** in the stores above (including Matt artifacts).
+- **Not already recorded** in the stores above, or in `CONTEXT.md` / ADRs / tickets / specs.
 - **Not** secrets, one-off flakes, unsupported guesses, or session logistics.
 
 Failures: wrong assumption, repeated dead end, user correction. Successes: a move that avoided a usual failure, a check that settled the work.
@@ -93,7 +93,7 @@ If none pass: report **nothing to harvest** and write nothing.
 - Standing "always do X in this repo" → instruction file
 - Named reusable procedure you would invoke again here, uncovered by an existing skill → project skill (expensive; default to memory or one instruction line)
 
-**Conflicts:** do not overwrite or concatenate. Quote both. Recommend overwrite only if this session showed the old text was wrong (user correction, or following it caused the wasted iterations). Conflict with a Matt artifact → skip and point at that file.
+**Conflicts:** do not overwrite or concatenate. Quote both. Recommend overwrite only if this session showed the old text was wrong (user correction, or following it caused the wasted iterations). Conflict with `CONTEXT.md`, an ADR, a ticket, or a spec → skip and point at that file.
 
 **Done when:** every candidate is routed, skipped with a reason, or marked as a conflict.
 
@@ -116,7 +116,7 @@ Never `git add` or `git commit`.
 
 ## 8. Apply confirmation and report
 
-On yes, apply group 2. Do not edit Matt's `## Agent skills` block except to add the memory pointer.
+On yes, apply group 2. Do not edit an existing `## Agent skills` block except to add the memory pointer.
 
 Report what was written and what was skipped. Leave git unstaged.
 
