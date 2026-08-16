@@ -15,7 +15,7 @@ When editing the instruction file or a project skill, follow `/writing-for-agent
 
 ## 1. Gate
 
-Stop and write nothing unless the cwd has a git root **or** a root `AGENTS.md` / `CLAUDE.md`. Harvest is project-scoped.
+Stop and write nothing unless the cwd has a git root **or** a root `AGENTS.md` / `CLAUDE.md` / `.github/copilot-instructions.md`. Harvest is project-scoped.
 
 **Done when:** you have a project, or you have stopped.
 
@@ -23,8 +23,9 @@ Stop and write nothing unless the cwd has a git root **or** a root `AGENTS.md` /
 
 **Instruction file** (behaviour) — git-root only:
 
-- `CLAUDE.md` if it exists, else `AGENTS.md`.
-- If neither exists, ask before creating. Never create the other name when one exists. Never create nested instruction files. If only a nested `AGENTS.md` exists, edit that one and say so.
+- Copilot session **and** `.github/copilot-instructions.md` exists → that file (Copilot always-on repo instructions). Path-specific `.github/instructions/*.instructions.md` are read-only; do not harvest into them.
+- Else `CLAUDE.md` if it exists, else `AGENTS.md` (Copilot also loads `AGENTS.md` when present).
+- If none of those exist, ask before creating. Never create the other name when one exists. Never create `.github/copilot-instructions.md` when `CLAUDE.md` or `AGENTS.md` already exists. Never create nested instruction files. If only a nested `AGENTS.md` exists, edit that one and say so.
 
 **Memory** (facts, decisions, project state, reasoning that may change):
 
@@ -33,11 +34,11 @@ Stop and write nothing unless the cwd has a git root **or** a root `AGENTS.md` /
 
 **Project skills** (reusable workflows):
 
-- Existing `.agents/skills`, `.claude/skills`, or `.cursor/skills`.
-- If none, `.agents/skills/<name>/SKILL.md` plus an instruction-file pointer.
-- One copy. Never the personal skills library this skill lives in.
+- Existing `.agents/skills`, `.claude/skills`, `.cursor/skills`, or `.github/skills`.
+- If none, `.agents/skills/<name>/SKILL.md` plus an instruction-file pointer. Copilot also reads `.agents/skills`; do not default to `.github/skills` unless that tree already exists.
+- One copy. Never the personal skills library this skill lives in (`~/.copilot/skills` included).
 
-**Read-only:** `CONTEXT.md`, `CONTEXT-MAP.md`, `docs/adr/**`, tickets/specs from this session, harness-native memories (`~/.claude/projects/*/memory/`, Cursor user memories, Codex personal memories).
+**Read-only:** `CONTEXT.md`, `CONTEXT-MAP.md`, `docs/adr/**`, tickets/specs from this session, harness-native memories (`~/.claude/projects/*/memory/`, Cursor user memories, Codex personal memories, Copilot `~/.copilot/session-store.db` / Chronicle).
 
 **Done when:** paths are chosen.
 
@@ -60,6 +61,8 @@ Use the context window plus **this session's transcript only** (id, cwd, mtime).
 | Cursor | `~/.cursor/projects/<workspace>/agent-transcripts/<id>/<id>.jsonl` |
 | Claude Code | `~/.claude/projects/<encoded-cwd>/<sessionId>.jsonl` |
 | Codex | `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` (`session_meta` cwd / id) |
+| Copilot CLI | `~/.copilot/session-state/<id>/events.jsonl` (`workspace.yaml` for cwd; `$COPILOT_HOME` replaces `~/.copilot`). `/session` prints the path. |
+| Copilot in VS Code | `<user-data>/User/workspaceStorage/<hash>/GitHub.copilot-chat/transcripts/<id>.jsonl` — Linux `~/.config/Code`, macOS `~/Library/Application Support/Code`. Pick the hash whose `workspace.json` `folder` URI is this cwd. Fall back to `chatSessions/*.jsonl` in the same hash dir. |
 
 If the file is missing, unreadable, or ambiguous: harvest from the window and say recovery failed.
 
