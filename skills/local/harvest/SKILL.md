@@ -116,7 +116,7 @@ Never `git add` or `git commit`.
 
 ## 8. Apply confirmation and report
 
-On yes, apply group 2. Do not edit an existing `## Agent skills` block except to add the memory pointer.
+On yes, apply group 2.
 
 Report what was written and what was skipped. Leave git unstaged.
 
