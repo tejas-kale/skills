@@ -84,16 +84,7 @@ If none pass: report **nothing to harvest** and write nothing.
 
 - One-line fact / correction / state → memory
 - Standing "always do X in this repo" → instruction file
-- Named reusable **procedure** you would invoke again here → project skill (expensive; default to memory or one instruction line)
-
-A skill is a **procedural anchor** — ordered steps, tool sequence, intermediate checks, recurring pitfalls — not a fact dump and not a pasted trace. Skill-shaped: environment setup, output/schema, service lifecycle, command patterns. Not skill-shaped: a better algorithm, a one-task path, or "verify harder."
-
-When writing or editing a project skill:
-
-- Distill. Drop failed branches, exploration, and harness-specific residue.
-- Keep outcomes explicit: which path worked, which failed. Failure-only evidence → memory or one instruction-file warning, not a new skill.
-- Prefer **edit** an existing skill over a near-duplicate; similar descriptions confuse later retrieval.
-- Name when it applies and the check that says stop following it.
+- Named reusable **procedure** you would invoke again here → project skill (expensive; default to memory or one instruction line). Shape it with `/writing-for-agents`. Failure-only evidence → memory or one instruction-file warning, not a new skill.
 
 **Conflicts:** quote both sides. Recommend overwrite only if this session showed the old text was wrong (user correction, or following it caused the wasted iterations). Conflict with a read-only file → skip and point at that file.
 
