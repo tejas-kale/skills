@@ -1,6 +1,19 @@
 # Skill mechanics
 
-The skill-specific branch of [`writing-for-agents`](SKILL.md): what changes when the document is a skill — frontmatter, the invocation choice, and router skills. Everything else about writing it is the universal reference in `SKILL.md`.
+The skill-specific branch of [`writing-for-agents`](SKILL.md): what a skill *is*, then frontmatter, invocation, and router skills. Everything else about writing it is the universal reference in `SKILL.md`.
+
+## Procedural anchor
+
+A skill is a **procedural anchor**: ordered steps, tool sequence, intermediate checks, recurring pitfalls. It stabilises how the agent acts. Facts, decisions, and one-line corrections belong in memory or an instruction file.
+
+Write a skill when the reusable thing is operational: environment setup, output/schema, service lifecycle, command patterns. Do not write a skill for a better algorithm, a one-task path, or a plea to verify harder.
+
+When you write or edit a skill:
+
+- Distill. Keep the procedure. Drop failed branches, exploration, and harness-specific residue.
+- Keep outcomes explicit: which path worked, which failed.
+- Prefer **edit** an existing skill over a near-duplicate. Similar descriptions confuse later retrieval.
+- Name when it applies and the check that says stop following it.
 
 ## Invocation
 
