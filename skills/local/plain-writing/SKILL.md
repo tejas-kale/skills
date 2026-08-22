@@ -6,12 +6,11 @@ disable-model-invocation: true
 
 # Plain writing
 
-The user typed `/plain-writing`. Write in a voice that is plain, boring, and
-easy to understand in one pass. Apply it to the words around code, not to code.
+The user typed `/plain-writing`. Draft or edit the prose they named. If they
+also said **deslopify**, rewrite the previous reply using the command at the
+end of this file. Apply to the words around code, not to code.
 
-There are four groups of rules: word choice and tone, sentences and paragraphs,
-punctuation and formatting, and patterns to avoid. Each rule has a before and
-after. After the rules comes the deslopify command.
+Each rule has a before and after.
 
 ## Word choice and tone
 
