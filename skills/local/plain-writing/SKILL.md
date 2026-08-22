@@ -10,8 +10,6 @@ The user typed `/plain-writing`. Draft or edit the prose they named. If they
 also said **deslopify**, rewrite the previous reply using the command at the
 end of this file. Apply to the words around code, not to code.
 
-Each rule has a before and after.
-
 ## Voice
 
 Write **plain**, **boring**, and **literal** prose in **complete** sentences. Put
@@ -44,60 +42,37 @@ Tuesdays.
 After: The agent polls the file and reacts to changes. The team meets on
 Tuesdays.
 
-Common model tells and replacements: [`TELLS.md`](TELLS.md).
+## Checkable set
 
-## Word choice and tone
+A pass is done when every heading, sentence, and list item would survive a
+native-speaker edit for this voice.
 
-1. **Use simple, everyday words.** Don't pick a fancy synonym when a plain word
-   works. Typical overused words live in [`TELLS.md`](TELLS.md).
-   Before: We leverage the cache to unlock a more robust query experience.
-   After: We use the cache to make repeated queries faster.
+- Everyday words and stable terms already in the work. Contractions are fine.
+  One name for one thing. No coined label, hyphenated invention, or metaphor.
+- Complete sentences. Ranges use "to". Join clauses with a period or "and",
+  not an em dash.
+- A paragraph opens with the point, then support. In chat, one or two
+  sentences of problem context, then what changed. Skip the setup in an
+  essay.
+- Headings are sentence case. Lists stay at three or four points. Nest the
+  rest.
+- Precise: say who does what, or by what mechanism. Cut padding clauses
+  ("as we move forward", "before we call the work done").
 
-2. **No jargon.** Always use human-understandable language, the way two people
-   talk to each other. Don't invent jargon or shorthand (that is, if a word or
-   phrase is not in the Merriam Webster dictionary, don't use it). Use
-   established technical terms only when they are most precise, and briefly
-   define them when readers may not know them.
-   Before: The score is a calibrated proxy for whether the property holds.
-   After: The score estimates how likely the property is to hold.
+Before: Upload the document. The file is parsed, and the record is saved.
+After: Upload the document. The document is parsed and saved.
 
-3. **No puffery or empty emphasis.** See [`TELLS.md`](TELLS.md). State the
-   actual point, or cut the sentence.
-   Before: This result matters, and it carries weight for the design.
-   After: The scores barely moved, so we can skip the model on most documents.
+Before: The exporter now waits on the reset header, and `dotnet test` is green.
+After: The Okta System Log exporter was rereading whole hours, so a retry
+could write the same event twice. It now waits using the response reset
+header, and the six acceptance tests pass.
 
-4. **Use consistent terminology and constrain your vocabulary.**
-   Before: Upload the document. The file is parsed, and the record is saved.
-   After: Upload the document. The document is parsed and saved.
+If a line still reads as a slogan, a guess, or a flourish, rewrite it until it
+states a fact.
 
-5. **It's ok to use contractions.** They match everyday speech, so use them
-   freely.
-   Before: Do not worry, it is not going to overwrite your file.
-   After: Don't worry, it's not going to overwrite your file.
+Common model tells: [`TELLS.md`](TELLS.md).
 
-6. **Do not invent hyphenated adjectives.** See [`TELLS.md`](TELLS.md).
-   Before: We added a reveal-style colon to the output.
-   After: We added a colon that shows the schema.
-
-7. **Keep the writing boring, descriptive, and explanatory.** Do not use a
-   catchy phrase, slogan, clever label, or wording meant to sound memorable.
-   This rule applies everywhere; to headings, topic sentences, callouts,
-   labels, summaries, and ordinary prose.
-   Before: Legal requirements as a floor.
-   After: Applicable legal constraints.
-   Before: # The alignment loop
-   After: # Iterative refinement using development disagreements
-
-## Sentences and paragraphs
-
-8. **Write complete sentences.** Each sentence should have a subject and a
-   verb. Do not write fragments, and do not stitch unrelated ideas together with
-   colons or semicolons. But it is ok to join closely related ideas with plain
-   conjunctions, like "and", "because", or "so".
-   Before: The agent polls the file and reacts to changes, and the team meets on
-   Tuesdays.
-   After: The agent polls the file and reacts to changes. The team meets on
-   Tuesdays.
+## Sequence and length
 
 9. **When you present a workflow or sequence, walk through it in order.** Use
    "First", "Second", "Third", and give each step its own sentence so the
@@ -152,31 +127,6 @@ Common model tells and replacements: [`TELLS.md`](TELLS.md).
     p95 latency fell from 900 ms to 220 ms. To do: validate recall on long
     queries.
 
-13. **Be precise and unambiguous, and cut unnecessary clauses.** Say exactly
-    what changes, who does what, or by what mechanism. Prefer a concrete
-    statement over an evocative abstraction, e.g., don't say things like
-    "improvement stops being guesswork". Also drop trailing or side clauses
-    that add no fact, e.g., "before we call the work done", "as we move
-    forward", or "for the time being". Keep the sentence long when the content
-    needs it, but do not pad it.
-    Before: With trusted scores, improvement stops being guesswork.
-    After: With trusted scores, you can measure whether each change helped,
-    so you keep or revert each change based on the measured result.
-    Before: We still need to validate recall on long queries before we call
-    the work done.
-    After: To do: validate recall on long queries.
-
-14. **In chat, give context on the problem.** When you are chatting back and
-    forth, write for a smart reader who does not have context on the problem,
-    or who forgot it. Give context on the problem and on what was happening
-    before. Then say what changed. Keep the setup short. Do not dump the whole
-    history. Ignore this rule if you are writing an essay.
-    Before: The exporter now waits on the reset header, and `dotnet test` is
-    green.
-    After: The Okta System Log exporter was rereading whole hours, so a retry
-    could write the same event twice. It now waits using the response reset
-    header, and the six acceptance tests pass.
-
 ## Punctuation and formatting
 
 15. **No dashes or middle dots.** Do not use em dashes or en dashes, including in
@@ -227,19 +177,6 @@ Common model tells and replacements: [`TELLS.md`](TELLS.md).
     - Still open
       - Test recall on long queries
       - Unblock analytics export
-
-## Patterns to avoid
-
-Leftover bans (fake agency, "not just X but Y", stacked questions, vague
-demonstratives, opening with a count) live in [`TELLS.md`](TELLS.md).
-
-21. **No analogies or imagery.** Do not explain by comparing to something else,
-    and do not use metaphor. Describe the actual thing in literal terms. Write
-    in a boring way.
-    Before: The feature index is like a card catalog that the optimizer can flip
-    through.
-    After: The feature index is a list of named features. The optimizer can look
-    up which feature matches a request.
 
 ## The deslopify command
 
