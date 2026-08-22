@@ -75,55 +75,31 @@ quotes, middle dots): [`PUNCTUATION.md`](PUNCTUATION.md).
 
 ## Sequence and length
 
-9. **When you present a workflow or sequence, walk through it in order.** Use
-   "First", "Second", "Third", and give each step its own sentence so the
-   reader can follow it, or break up steps with semicolons.
-   Before: The groups the features were sorted into were the authors' own
-   reading, the example posts were written by hand, and finer detail meant
-   training extra small models and labeling again.
-   After: First, the authors sorted the features into groups themselves, based on
-   their own reading of the outputs. Second, they wrote the example posts by
-   hand. Third, when they wanted finer detail, they trained another small
-   model, and they labeled the posts again.
+**Order.** When the reader must execute steps, put them in order. Number them
+only then. Ordinary explanation can stay in running prose.
 
-10. **Organize a paragraph as a topic sentence and then support.** Start each
-    paragraph or section with a topic sentence that states the main point. Then,
-    the next sentence should be a supporting example or fact, with an extra
-    sentence about it if it needs one. Then, introduce more support with a plain
-    connective like "For example", "Moreover", or "Or".
-    Before: The parser skips files with no changes. The cache holds the previous
-    output. Most renders are fast.
-    After: Most renders are fast. For example, the parser skips files with no
-    changes, so the server returns early. Moreover, the cache keeps the previous
-    output, so a repeated render does no work.
+Before: The groups the features were sorted into were the authors' own
+reading, the example posts were written by hand, and finer detail meant
+training extra small models and labeling again.
+After: The authors sorted the features into groups from their own reading.
+They wrote the example posts by hand. When they wanted finer detail, they
+trained another small model and labeled the posts again.
 
-11. **Never write three or more clauses in one sentence, or three or more
-    example sentences in a row.** In ordinary prose, a sentence may have one or
-    two related clauses. Do not pack three or more clauses into one prose
-    sentence. If you need that many points, use a numbered First / Second / Third
-    sequence under rule 9, or short bullet points when you are writing a
-    brief. If list points are examples and you want to inline them, introduce
-    with "e.g.". Also do not give three or more example sentences back to back
-    to support the same point.
-    Before: The parser reads the file, the validator checks the fields, and the
-    writer saves the record.
-    After: The parser reads the file, and the validator checks the fields. The
-    writer then saves the record.
+**Explain out loud.** Prefer longer sentences with commas over a stack of
+fragments. A sentence can hold one or two related clauses. If you need more
+points, start a new sentence or a short list. Do not require "Moreover" or
+"For example" as a connective.
 
-12. **Prefer long, explanatory sentences over short, punchy ones.** In ordinary
-    prose, write the way people explain things out loud: longer sentences with
-    commas, and the simplest way to say the point. Do not break one thought into
-    a stack of short sentences, and don't write catchy short phrases. Short
-    lines are fine only in labeled briefs, bullets, or a First / Second / Third
-    sequence, e.g., "To do: validate recall on long queries."
-    Before: The gate runs on every merge. It blocks regressions. Nobody
-    bypasses it.
-    After: The gate runs on every merge, and it blocks changes that fail a
-    regression case. A regression cannot make it to production, unless someone
-    deliberately overrides the check.
-    Before: Search ranking now uses a scored model instead of heuristics. The
-    change reduced p95 latency from 900 ms to 220 ms. We still need to validate
-    recall on long queries.
-    After: Search ranking now uses a scored model instead of heuristics, and
-    p95 latency fell from 900 ms to 220 ms. To do: validate recall on long
-    queries.
+Before: The gate runs on every merge. It blocks regressions. Nobody bypasses
+it.
+After: The gate runs on every merge, and it blocks changes that fail a
+regression case. A regression cannot make it to production unless someone
+deliberately overrides the check.
+
+Before: Most renders are fast. For example, the parser skips files with no
+changes, so the server returns early. Moreover, the cache keeps the previous
+output, so a repeated render does no work.
+After: Most renders are fast. The parser skips files with no changes, so the
+server returns early. The cache keeps the previous output, so a repeated
+render does no work.
+
