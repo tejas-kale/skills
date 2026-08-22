@@ -1,21 +1,13 @@
 ---
 name: plain-writing
-description: >-
-  Writes and edits prose in a plain and boring style: simple everyday words,
-  complete sentences, no dashes, no jargon, and no analogies. Use when
-  drafting or revising documents, Notion pages, reports, summaries, READMEs,
-  emails, slides, commit messages, or PR descriptions, or when the user asks
-  to simplify, clean up, tighten, reword, or make writing clearer. Use when
-  the user invokes /plain-writing deslopify or asks to deslopify an agent
-  response. Do not apply to code, only to the words around it.
-license: MIT
+description: Plain, boring prose for people.
+disable-model-invocation: true
 ---
 
 # Plain writing
 
-The plain writing skill captures how the user wants writing to read: plain,
-boring, and easy to understand in one pass. Apply it by default when you write
-for them.
+The user typed `/plain-writing`. Write in a voice that is plain, boring, and
+easy to understand in one pass. Apply it to the words around code, not to code.
 
 There are four groups of rules: word choice and tone, sentences and paragraphs,
 punctuation and formatting, and patterns to avoid. Each rule has a before and

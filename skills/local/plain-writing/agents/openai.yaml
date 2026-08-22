@@ -1,3 +1,5 @@
 interface:
   display_name: "Plain writing"
   short_description: "Write and edit prose in a plain, boring style"
+policy:
+  allow_implicit_invocation: false
