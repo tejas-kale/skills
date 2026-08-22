@@ -12,11 +12,44 @@ end of this file. Apply to the words around code, not to code.
 
 Each rule has a before and after.
 
+## Voice
+
+Write **plain**, **boring**, and **literal** prose in **complete** sentences. Put
+the main point in the first sentence of a paragraph, then support it.
+
+**Plain.** Everyday words a coworker would say out loud. Keep one term for one
+thing. Domain terms already in the work are fine. Define them once if the
+reader may not know them.
+
+Before: We leverage the cache to unlock a more robust query experience.
+After: We use the cache to make repeated queries faster.
+
+**Boring.** Descriptive and explanatory. Headings and labels name the thing.
+
+Before: Legal requirements as a floor.
+After: Applicable legal constraints.
+
+**Literal.** Describe the thing itself. Name the person or process that acts.
+
+Before: The feature index is like a card catalog that the optimizer can flip
+through.
+After: The feature index is a list of named features. The optimizer can look
+up which feature matches a request.
+
+**Complete.** Each sentence has a subject and a verb. Join related ideas with
+"and", "because", or "so".
+
+Before: The agent polls the file and reacts to changes, and the team meets on
+Tuesdays.
+After: The agent polls the file and reacts to changes. The team meets on
+Tuesdays.
+
+Common model tells and replacements: [`TELLS.md`](TELLS.md).
+
 ## Word choice and tone
 
 1. **Use simple, everyday words.** Don't pick a fancy synonym when a plain word
-   works. Also avoid words AI tools overuse, e.g., "delve", "tapestry",
-   "landscape", "robust", "leverage", and "reach".
+   works. Typical overused words live in [`TELLS.md`](TELLS.md).
    Before: We leverage the cache to unlock a more robust query experience.
    After: We use the cache to make repeated queries faster.
 
@@ -28,9 +61,7 @@ Each rule has a before and after.
    Before: The score is a calibrated proxy for whether the property holds.
    After: The score estimates how likely the property is to hold.
 
-3. **No puffery or empty emphasis.** Drop words that add emphasis but no
-   information, e.g., "really", "real", "matters", "worth", "carries weight",
-   "boasts", "a testament to", "pivotal", "renowned", and "quietly". State the
+3. **No puffery or empty emphasis.** See [`TELLS.md`](TELLS.md). State the
    actual point, or cut the sentence.
    Before: This result matters, and it carries weight for the design.
    After: The scores barely moved, so we can skip the model on most documents.
@@ -44,10 +75,7 @@ Each rule has a before and after.
    Before: Do not worry, it is not going to overwrite your file.
    After: Don't worry, it's not going to overwrite your file.
 
-6. **Do not invent hyphenated adjectives.** Avoid a phrase you make up by
-   joining words with a hyphen to sound compact or clever. If you would not find
-   it in a dictionary, don't use it. A common compound adjective that people
-   already use is fine, e.g., "well-crafted".
+6. **Do not invent hyphenated adjectives.** See [`TELLS.md`](TELLS.md).
    Before: We added a reveal-style colon to the output.
    After: We added a colon that shows the schema.
 
@@ -202,13 +230,8 @@ Each rule has a before and after.
 
 ## Patterns to avoid
 
-20. **Do not give inanimate things fake agency.** Do not write as if a system
-    or object transforms, decides, or intends on its own when a person or
-    process is the real actor. Ordinary factual verbs for tools and systems are
-    fine, e.g., "The API returns JSON", "The job writes the file", or "The
-    paper argues". Prefer a human or process subject when that is clearer.
-    Before: The logs become searchable records, once the job finishes.
-    After: You can search the logs, once the job finishes.
+Leftover bans (fake agency, "not just X but Y", stacked questions, vague
+demonstratives, opening with a count) live in [`TELLS.md`](TELLS.md).
 
 21. **No analogies or imagery.** Do not explain by comparing to something else,
     and do not use metaphor. Describe the actual thing in literal terms. Write
@@ -217,40 +240,6 @@ Each rule has a before and after.
     through.
     After: The feature index is a list of named features. The optimizer can look
     up which feature matches a request.
-
-22. **Never use negative parallelism of the form "not just X, it is Y" or
-    "not only X, but Y".** State what the thing is. A plain refusal or
-    correction is fine, including a short quote of a customer's hype phrase
-    when you replace it with a concrete fact.
-    Before: It is not just a parser, it is a full toolchain.
-    After: It is a parser and a formatter.
-    Before: We do not describe the API as "enterprise-grade robust," because
-    that phrase can mean different things.
-    After: The API has a 99.9% monthly uptime SLO.
-
-23. **Do not stack rhetorical questions.** AI writing often asks two or three
-    rhetorical questions in a row to sound thoughtful. Don't do this. Just state
-    the problem directly.
-    Before: Does the tool keep the writer's voice? Does it make the argument
-    stronger or weaker?
-    After: We do not yet know whether the tool keeps the writer's voice, or
-    whether it makes the argument stronger or weaker.
-
-24. **Do not use vague demonstrative pronouns.** Do not use "This", "That",
-    "These", or "Those", especially do not start a sentence with a demonstrative
-    pronoun, and never begin a paragraph with a sentence that contains a
-    demonstrative anywhere in it.
-    Before: That context carries into the next turn.
-    After: The agent applies the rules you saved on the next turn.
-
-25. **Do not open with a count of things.** Never start by announcing how many
-    points are coming, e.g., "Two cautions." or "Three things to keep in mind."
-    State the first point directly. If you absolutely must present many things,
-    use a bullet list instead.
-    Before: Two cautions. First, the section can drift out of date. Second,
-    it can balloon if every item gets a sentence.
-    After: The section can drift out of date, because it duplicates facts
-    that live elsewhere. It can also balloon if every item gets a sentence.
 
 ## The deslopify command
 
