@@ -7,8 +7,8 @@ disable-model-invocation: true
 # Plain writing
 
 The user typed `/plain-writing`. Draft or edit the prose they named. If they
-also said **deslopify**, rewrite the previous reply using the command at the
-end of this file. Apply to the words around code, not to code.
+also said **deslopify**, read [`DESLOPIFY.md`](DESLOPIFY.md) and rewrite the
+previous reply. Apply to the words around code, not to code.
 
 ## Voice
 
@@ -70,7 +70,8 @@ header, and the six acceptance tests pass.
 If a line still reads as a slogan, a guess, or a flourish, rewrite it until it
 states a fact.
 
-Common model tells: [`TELLS.md`](TELLS.md).
+Common model tells: [`TELLS.md`](TELLS.md). Punctuation trivia (colons, curly
+quotes, middle dots): [`PUNCTUATION.md`](PUNCTUATION.md).
 
 ## Sequence and length
 
@@ -126,67 +127,3 @@ Common model tells: [`TELLS.md`](TELLS.md).
     After: Search ranking now uses a scored model instead of heuristics, and
     p95 latency fell from 900 ms to 220 ms. To do: validate recall on long
     queries.
-
-## Punctuation and formatting
-
-15. **No dashes or middle dots.** Do not use em dashes or en dashes, including in
-    number ranges. Join clauses with a period or "and", and write ranges with
-    "to". Do not use the middle dot (·) as a separator; use a comma, "and", or
-    separate lines instead.
-    Before: The build is fast — it finishes in 10 to 20 seconds.
-    After: The build is fast. It finishes in 10 to 20 seconds.
-
-16. **Don't use colons to join clauses in ordinary prose.** Do not use a colon
-    to glue two clauses or to set up a point in essay-like writing. A colon is
-    fine when you introduce a list. A colon is also fine as a short label in
-    updates, briefs, status notes, and PR descriptions, e.g., "Summary:",
-    "Changes:", or "Remaining work:".
-    Before: Read for the schema: the feature fires.
-    After: Read for the schema. The feature fires.
-    Before (allowed in a PR or update): Summary: Replace em dashes in
-    generated docs.
-    After (same text is fine): Summary: Replace em dashes in generated docs.
-
-17. **Use straight quotes, not curly quotes.**
-    Before: The system logs each “event” as it happens.
-    After: The system logs each "event" as it happens.
-
-18. **Keep the formatting plain.** Use sentence case in headings. Do not use
-    bold for decoration.
-    Before: ## How To Install The Skill
-    After: ## How to install the skill
-
-19. **You can use lists, but do not overuse them.** Keep a list to three or
-    four points, and nest extra points if you need more. When you are writing
-    an essay, use lists and tables very sparingly.
-    Before: Shipped this week:
-    - dark mode
-    - an invite link fix
-    - a schema mismatch that blocked analytics export
-    - renderer cleanup
-    - copy edits
-    - a scored ranking model
-    - a p95 drop from 900 ms to 220 ms
-    - untested recall on long queries
-    After: Search ranking now uses a scored model, and p95 latency fell from
-    900 ms to 220 ms. The old heuristic path is still in the repo as a
-    fallback.
-    - Shipped
-      - Dark mode
-      - Invite link fix
-    - Still open
-      - Test recall on long queries
-      - Unblock analytics export
-
-## The deslopify command
-
-When the user says `/plain-writing deslopify`, rewrite the previous agent
-response, or the text after the command, for a sharp CEO or technical reader
-who has no project context. Return only the rewrite.
-
-Start with the main conclusion, then cover the background, how it works, and
-present all information logically and sequentially. Include technical details
-the reader needs (standardize on existing well-known terminology, not new
-terminology), and define unfamiliar terms.
-
-Follow the plain-writing rules above.
