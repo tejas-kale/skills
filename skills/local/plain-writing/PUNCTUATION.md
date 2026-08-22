@@ -1,7 +1,7 @@
-# Punctuation trivia
+# Punctuation
 
 Load this file when the draft still uses model punctuation. Em dashes and
-ranges already live in the checkable set (`SKILL.md`).
+ranges already live in [`SKILL.md`](SKILL.md).
 
 ## Colons
 

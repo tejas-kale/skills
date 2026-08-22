@@ -1,7 +1,7 @@
 # Tells
 
-Leftover bans that a positive voice line cannot encode. Pair each with the
-replacement. Load this file when a draft still sounds like a model.
+Load this file when a draft still sounds like a model. Each tell has a
+replacement.
 
 ## Overused words
 
@@ -36,14 +36,14 @@ process subject when that is who acts.
 Before: The logs become searchable records, once the job finishes.
 After: You can search the logs, once the job finishes.
 
-## "Not just X, but Y"
+## Contrast formulas
 
 State what the thing is.
 
 Before: It is not just a parser, it is a full toolchain.
 After: It is a parser and a formatter.
 
-## Stacked rhetorical questions
+## Stacked questions
 
 State the problem.
 

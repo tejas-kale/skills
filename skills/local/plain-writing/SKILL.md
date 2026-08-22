@@ -42,10 +42,10 @@ Tuesdays.
 After: The agent polls the file and reacts to changes. The team meets on
 Tuesdays.
 
-## Checkable set
+## Done when
 
 A pass is done when every heading, sentence, and list item would survive a
-native-speaker edit for this voice.
+coworker reading it once.
 
 - Everyday words and stable terms already in the work. Contractions are fine.
   One name for one thing. No coined label, hyphenated invention, or metaphor.
@@ -70,8 +70,8 @@ header, and the six acceptance tests pass.
 If a line still reads as a slogan, a guess, or a flourish, rewrite it until it
 states a fact.
 
-Common model tells: [`TELLS.md`](TELLS.md). Punctuation trivia (colons, curly
-quotes, middle dots): [`PUNCTUATION.md`](PUNCTUATION.md).
+Common model tells: [`TELLS.md`](TELLS.md). Colons, curly quotes, and middle
+dots: [`PUNCTUATION.md`](PUNCTUATION.md).
 
 ## Sequence and length
 
@@ -81,14 +81,14 @@ only then. Ordinary explanation can stay in running prose.
 Before: The groups the features were sorted into were the authors' own
 reading, the example posts were written by hand, and finer detail meant
 training extra small models and labeling again.
-After: The authors sorted the features into groups from their own reading.
-They wrote the example posts by hand. When they wanted finer detail, they
+After: The authors sorted the features into groups from their own reading,
+and they wrote the example posts by hand. When they wanted finer detail, they
 trained another small model and labeled the posts again.
 
 **Explain out loud.** Prefer longer sentences with commas over a stack of
 fragments. A sentence can hold one or two related clauses. If you need more
-points, start a new sentence or a short list. Do not require "Moreover" or
-"For example" as a connective.
+points, start a new sentence or a short list. Join support with a new
+sentence.
 
 Before: The gate runs on every merge. It blocks regressions. Nobody bypasses
 it.
