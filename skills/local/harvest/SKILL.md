@@ -11,7 +11,7 @@ If the user passed an argument, treat it as a scope limiter. No argument means t
 
 Inspect in this session. Do not dispatch a subagent to read the conversation.
 
-When editing the instruction file or a project skill, follow `/writing-for-agents`.
+When editing the instruction file or a project skill, write short, literal, agent-facing prose: one procedure, no ceremony, names that match the repo.
 
 ## 1. Gate
 
@@ -49,7 +49,7 @@ Read the instruction file, memory file (if any), project skills, and the read-on
 
 If this session already wrote glossary, ADRs, tickets, or specs, trust those files.
 
-If terms look unresolved and `/domain-modeling` never ran, say so and suggest `/grill-with-docs` or `/domain-modeling`.
+If terms look unresolved, say so and skip inventing a glossary unless this session already settled the words.
 
 **Done when:** the instruction file, memory file (if any), project skills, and read-only files have been read.
 
@@ -84,7 +84,7 @@ If none pass: report **nothing to harvest** and write nothing.
 
 - One-line fact / correction / state → memory
 - Standing "always do X in this repo" → instruction file
-- Named reusable **procedure** you would invoke again here → project skill (expensive; default to memory or one instruction line). Shape it with `/writing-for-agents`. Failure-only evidence → memory or one instruction-file warning, not a new skill.
+- Named reusable **procedure** you would invoke again here → project skill (expensive; default to memory or one instruction line). Failure-only evidence → memory or one instruction-file warning, not a new skill.
 
 **Conflicts:** quote both sides. Recommend overwrite only if this session showed the old text was wrong (user correction, or following it caused the wasted iterations). Conflict with a read-only file → skip and point at that file.
 
