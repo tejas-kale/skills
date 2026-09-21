@@ -1,0 +1,112 @@
+#+title: <Analysis title>
+
+* Status
+
+- Planning status :: <ready | investigation-required | do-not-delegate>
+- Delegation gate :: <blocked | clear>
+- Plan owner :: <name>
+
+* Aim and intended use
+
+- Question ::
+- Intended use ::
+- Audience ::
+- Population ::
+- Decision informed ::
+- This analysis cannot support ::
+
+* Risk tier
+
+- Tier :: <exploratory | decision-support | production-or-external>
+- Reason ::
+
+* Data Understanding Record
+
+| Item | Settled meaning or value | Evidence |
+|------+--------------------------+----------|
+| Source and retrieval | | |
+| Population and unit of observation | | |
+| Grain, keys, and cardinality | | |
+| Fields and metrics | | |
+| Time semantics and window | | |
+| Nulls, sentinels, duplicates, and late data | | |
+| Filters, exclusions, and join loss | | |
+| Freshness, coverage, and bias | | |
+| Reconciliation or plausibility check | | |
+
+Add the relevant table, Databricks, internet, or API details beneath this table.
+
+* Method and assumptions
+
+- Method class ::
+- Method ::
+- Assumptions ::
+- Limits ::
+
+Place executable review blocks beside the claim they check. Keep large outputs elsewhere and link to them.
+
+* Decision Ledger
+
+| Decision | Reason | Alternatives rejected | Consequence |
+|----------+--------+-----------------------+-------------|
+
+* Verification Contract
+
+| Claim | Evidence | Acceptance rule | Independence | Human action |
+|-------+----------+-----------------+--------------+--------------|
+
+* Human review boundary
+
+** Claim-critical logic
+
+** Human-review-critical logic
+
+** Logic excluded from human review
+
+For each exclusion, name the plausible failure, independent oracle, failing fault probe, and evidence that the delegated workflow runs the test.
+
+* Review Map
+
+| Question | Org heading or block | Evidence or test | Expected invariant | Consequence if wrong |
+|----------+----------------------+------------------+--------------------+----------------------|
+
+* Reproducible execution
+
+- Environment and dependencies ::
+- Tangle and run ::
+- Parameters and date ranges ::
+- Randomness ::
+- Generated artefacts ::
+- Verification command ::
+
+* Return Contract
+
+** Required from the implementing agent
+
+- Implemented outcome.
+- Data version or retrieval evidence.
+- Checks run and their results.
+- Unresolved or changed assumptions.
+- Completed Review Map.
+- Human-review-critical Org block locations.
+- Generated artefacts and drift check.
+- Claims the agent cannot verify for the user.
+- Git review baseline and final commit SHA.
+
+** Implementation results
+
+The implementing agent completes this section without silently changing the agreed plan.
+
+* Unknowns and out of scope
+
+** Blocking unknowns
+
+** Bounded unknowns
+
+For each item, record the bound, risk, planned check, and owner.
+
+** Deferred choices and out of scope
+
+* Next action
+
+State the exact command or human action required by the planning status.
