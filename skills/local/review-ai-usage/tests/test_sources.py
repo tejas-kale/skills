@@ -62,6 +62,23 @@ def test_cursor_reads_json_blobs_read_only(cursor_root: Path) -> None:
     assert database.read_bytes() == before
 
 
+def test_vscode_reads_copilot_chat_transcripts(tmp_path: Path, fixtures: Path) -> None:
+    workspace = tmp_path / "vscode" / "workspaceStorage" / "hash"
+    target = workspace / "GitHub.copilot-chat" / "transcripts"
+    target.mkdir(parents=True)
+    shutil.copy(fixtures / "vscode" / "transcript.jsonl", target / "session.jsonl")
+    (workspace / "workspace.json").write_text('{"folder": "/work/project"}\n', encoding="utf-8")
+
+    report = collect_vscode(tmp_path / "vscode", SINCE, UNTIL)
+
+    assert report.available
+    assert {event.turn_id for event in report.events} == {"agent-turn"}
+    assert [event.role for event in report.events] == ["user", "assistant", "tool", "assistant"]
+    assert {event.interface for event in report.events} == {"copilot-vscode-agent"}
+    assert {event.workspace for event in report.events} == {"/work/project"}
+    assert "Still going." not in {event.text for event in report.events}
+
+
 def test_vscode_replays_snapshot_and_ignores_incomplete_request(tmp_path: Path, fixtures: Path) -> None:
     target = tmp_path / "vscode" / "workspaceStorage" / "workspace" / "chatSessions"
     target.mkdir(parents=True)

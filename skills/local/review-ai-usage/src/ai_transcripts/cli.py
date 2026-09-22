@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -98,19 +99,35 @@ def collect(since: str | None, until: str | None, sources: tuple[str, ...], outp
 
 
 def _filtered_events(reports: list[SourceReport], config: Config) -> list[Event]:
-    excluded = tuple(str(Path(value).expanduser()) for value in config.excluded_workspaces)
-    seen: set[tuple[str, str]] = set()
+    excluded = tuple(os.path.normpath(str(Path(value).expanduser())) for value in config.excluded_workspaces)
+    seen: set[tuple[str, str, str]] = set()
     result: list[Event] = []
     for report in reports:
         for event in report.events:
-            if excluded and any(event.workspace.startswith(prefix) for prefix in excluded):
+            if _workspace_excluded(event.workspace, excluded):
                 continue
-            identity = (event.source, event.session_id, event.event_kind, event.event_id)
+            identity = (event.session_id, event.event_kind, event.event_id)
             if identity in seen:
                 continue
             seen.add(identity)
             result.append(event)
     return sorted(result, key=lambda event: (event.timestamp, event.source, event.session_id, event.event_id))
+
+
+def _workspace_excluded(workspace: str, excluded: tuple[str, ...]) -> bool:
+    if not workspace or not excluded:
+        return False
+    candidate = Path(os.path.normpath(os.path.expanduser(workspace)))
+    for prefix in excluded:
+        root = Path(prefix)
+        if candidate == root:
+            return True
+        try:
+            candidate.relative_to(root)
+        except ValueError:
+            continue
+        return True
+    return False
 
 
 @main.command("export-learnings")

@@ -85,6 +85,9 @@ def test_export_learnings_omits_pending_and_local_links(tmp_path: Path) -> None:
         "** Keep verification bounded :LESSON:CONFIRMED:\n"
         ":PROPERTIES:\n:MACHINE: personal\n:CONFIRMED: 2026-09-22\n:EVIDENCE_COUNT: 3\n:SESSION_ID: secret\n:END:\n"
         "Use [[/private/work/case.org][the supporting case]].\n"
+        "Details are at https://intranet.example/plan and token=super-secret-token.\n"
+        "```\nquoted raw excerpt should stay local\n```\n"
+        "See /Users/private/notes.org for the draft.\n"
         "** Unconfirmed lesson :LESSON:PENDING:\nPending text.\n",
         encoding="utf-8",
     )
@@ -97,6 +100,10 @@ def test_export_learnings_omits_pending_and_local_links(tmp_path: Path) -> None:
     assert "/private/work" not in result.stdout
     assert "SESSION_ID" not in result.stdout
     assert "Unconfirmed lesson" not in result.stdout
+    assert "https://intranet.example" not in result.stdout
+    assert "super-secret-token" not in result.stdout
+    assert "raw excerpt" not in result.stdout
+    assert "/Users/private" not in result.stdout
 
 
 def test_deduplication_is_scoped_to_a_session(tmp_path: Path) -> None:
@@ -122,3 +129,62 @@ def test_deduplication_is_scoped_to_a_session(tmp_path: Path) -> None:
     )
 
     assert len(_filtered_events([report], config)) == 3
+
+
+def test_exclusion_keeps_sibling_paths(tmp_path: Path) -> None:
+    def event(workspace: str) -> Event:
+        return Event(
+            source="codex",
+            interface="codex",
+            session_id=workspace,
+            turn_id="turn-1",
+            event_id=workspace,
+            timestamp="2026-09-22T10:00:00Z",
+            workspace=workspace,
+            role="assistant",
+            event_kind="message",
+            text="Complete.",
+        )
+
+    config = Config(
+        "personal",
+        tmp_path / "casebook.org",
+        (),
+        ("/work/project",),
+        {},
+        tmp_path / "state.json",
+    )
+    report = SourceReport(
+        "codex",
+        available=True,
+        events=(event("/work/project"), event("/work/project/sub"), event("/work/project-old")),
+    )
+
+    assert {item.workspace for item in _filtered_events([report], config)} == {"/work/project-old"}
+
+
+def test_deduplication_ignores_adapter_source(tmp_path: Path) -> None:
+    def event(source: str) -> Event:
+        return Event(
+            source=source,
+            interface=source,
+            session_id="shared-session",
+            turn_id="turn-1",
+            event_id="message-1",
+            timestamp="2026-09-22T10:00:00Z",
+            workspace="/work/project",
+            role="assistant",
+            event_kind="message",
+            text="Complete.",
+        )
+
+    config = Config("personal", tmp_path / "casebook.org", (), (), {}, tmp_path / "state.json")
+    reports = [
+        SourceReport("copilot", available=True, events=(event("copilot"),)),
+        SourceReport("copilot-vscode", available=True, events=(event("copilot-vscode"),)),
+    ]
+
+    result = _filtered_events(reports, config)
+
+    assert len(result) == 1
+    assert result[0].source == "copilot"
