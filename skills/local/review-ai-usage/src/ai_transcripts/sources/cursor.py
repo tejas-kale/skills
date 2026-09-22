@@ -56,13 +56,41 @@ def _message_rows(path: Path) -> list[tuple[int, str, dict[str, Any]]]:
         if isinstance(raw, bytes):
             if not raw.startswith(b"{"):
                 continue
-            raw = raw.decode("utf-8")
+            try:
+                raw = raw.decode("utf-8")
+            except UnicodeDecodeError:
+                continue
         if not isinstance(raw, str) or not raw.startswith("{"):
             continue
-        value = json.loads(raw)
-        if isinstance(value, dict) and value.get("role") in {"user", "assistant", "tool"}:
-            messages.append((int(rowid), str(blob_id), value))
+        documents = [
+            value for value in _json_documents(raw)
+            if isinstance(value, dict) and value.get("role") in {"user", "assistant", "tool"}
+        ]
+        for offset, value in enumerate(documents):
+            identifier = f"{blob_id}:{offset}" if len(documents) > 1 else str(blob_id)
+            messages.append((int(rowid), identifier, value))
     return messages
+
+
+def _json_documents(raw: str) -> list[Any]:
+    decoder = json.JSONDecoder()
+    documents: list[Any] = []
+    index = 0
+    length = len(raw)
+    while index < length:
+        while index < length and raw[index].isspace():
+            index += 1
+        if index >= length:
+            break
+        try:
+            value, end = decoder.raw_decode(raw, index)
+        except json.JSONDecodeError:
+            break
+        documents.append(value)
+        if end <= index:
+            break
+        index = end
+    return documents
 
 
 def _read_session(path: Path, since: datetime | None, until: datetime | None) -> list[Event]:
