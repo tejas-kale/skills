@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-transcripts"
+version = "0.1.0"
+description = "Read local AI-agent transcripts into a stable JSONL event stream"
+requires-python = ">=3.12"
+dependencies = ["click>=8.1,<9"]
+
+[project.scripts]
+ai-transcripts = "ai_transcripts.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ai_transcripts"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = ["pytest>=9,<10"]

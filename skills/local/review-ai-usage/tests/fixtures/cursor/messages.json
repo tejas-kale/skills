@@ -1,0 +1,8 @@
+[
+  {"role":"system","content":"System instructions"},
+  {"role":"user","content":"Inspect the configuration."},
+  {"role":"assistant","content":[{"type":"tool-call","toolCallId":"cursor-tool","toolName":"read_file","input":{"path":"config"}}],"id":"cursor-tool-message"},
+  {"role":"tool","content":[{"type":"tool-result","toolCallId":"cursor-tool","output":"configuration"}],"id":"cursor-tool-result"},
+  {"role":"assistant","content":[{"type":"text","text":"The configuration is valid."}],"id":"cursor-final"},
+  {"role":"user","content":"This request is unfinished."}
+]

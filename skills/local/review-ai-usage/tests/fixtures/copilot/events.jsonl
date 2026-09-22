@@ -1,0 +1,7 @@
+{"type":"session.start","id":"start","timestamp":"2026-09-22T10:00:00Z","data":{"sessionId":"copilot-session","context":{"cwd":"/work/project"}}}
+{"type":"assistant.turn_start","id":"turn-start","timestamp":"2026-09-22T10:01:00Z","data":{"turnId":"copilot-turn","interactionId":"interaction-1"}}
+{"type":"user.message","id":"copilot-user","timestamp":"2026-09-22T10:01:01Z","data":{"turnId":"copilot-turn","content":"Run the checks."}}
+{"type":"tool.execution_start","id":"copilot-call","timestamp":"2026-09-22T10:01:02Z","data":{"turnId":"copilot-turn","toolCallId":"tool-1","toolName":"shell","arguments":{"command":"test"}}}
+{"type":"tool.execution_complete","id":"copilot-result","timestamp":"2026-09-22T10:01:03Z","data":{"turnId":"copilot-turn","toolCallId":"tool-1","success":true,"result":"passed"}}
+{"type":"assistant.message","id":"copilot-assistant","timestamp":"2026-09-22T10:01:04Z","data":{"turnId":"copilot-turn","content":"All checks passed."}}
+{"type":"assistant.turn_end","id":"turn-end","timestamp":"2026-09-22T10:01:05Z","data":{"turnId":"copilot-turn"}}
