@@ -1,0 +1,5 @@
+interface:
+  display_name: "Review AI Usage"
+  short_description: "Review local agent transcripts into an Org casebook"
+policy:
+  allow_implicit_invocation: false
