@@ -5,23 +5,14 @@ from pathlib import Path
 from typing import Any
 
 from ..content import text_content
-from ..model import Event, SourceFailure, SourceReport
+from ..model import Event, SourceReport
 from ..time import in_window, iso_timestamp
-from .common import read_jsonl
+from .common import collect_files, read_jsonl
 
 
 def collect_claude_code(root: Path, since: datetime | None, until: datetime | None) -> SourceReport:
     files = sorted(root.glob("projects/*/*.jsonl"))
-    if not root.exists() or not files:
-        return SourceReport("claude-code", available=False)
-    events: list[Event] = []
-    failures: list[SourceFailure] = []
-    for path in files:
-        try:
-            events.extend(_read_session(path, since, until))
-        except (OSError, ValueError) as exc:
-            failures.append(SourceFailure("claude-code", str(path), str(exc)))
-    return SourceReport("claude-code", available=True, events=tuple(events), failures=tuple(failures))
+    return collect_files("claude-code", files if root.exists() else [], _read_session, since, until)
 
 
 def _is_human_prompt(record: dict[str, Any]) -> bool:

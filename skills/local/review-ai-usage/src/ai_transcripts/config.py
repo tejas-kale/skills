@@ -57,21 +57,31 @@ def load_config(path: Path) -> Config:
     )
 
 
-def write_config(path: Path, *, machine: str, casebook: Path) -> Config:
+def write_config(
+    path: Path,
+    *,
+    machine: str,
+    casebook: Path,
+    source_paths: dict[str, Path] | None = None,
+    excluded_workspaces: tuple[str, ...] = (),
+) -> Config:
     path.parent.mkdir(parents=True, exist_ok=True)
     state_path = default_state_path()
-    source_paths = default_source_paths()
-    enabled = [name for name, source_path in source_paths.items() if source_path.exists()]
+    resolved_source_paths = default_source_paths()
+    for name, source_path in (source_paths or {}).items():
+        if name in SOURCE_NAMES:
+            resolved_source_paths[name] = source_path.expanduser()
+    enabled = [name for name, source_path in resolved_source_paths.items() if source_path.exists()]
     lines = [
         f'machine = {json.dumps(machine)}',
         f'casebook = {json.dumps(str(casebook.expanduser()))}',
         f'state_path = {json.dumps(str(state_path))}',
         f'enabled_sources = {json.dumps(enabled)}',
-        'excluded_workspaces = []',
+        f'excluded_workspaces = {json.dumps(list(excluded_workspaces))}',
         "",
         "[source_paths]",
     ]
-    for name, source_path in source_paths.items():
+    for name, source_path in resolved_source_paths.items():
         lines.append(f'{json.dumps(name)} = {json.dumps(str(source_path))}')
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     state_path.parent.mkdir(parents=True, exist_ok=True)

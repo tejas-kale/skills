@@ -1,27 +1,17 @@
 from __future__ import annotations
 
-import json
 from datetime import datetime
 from pathlib import Path
 
 from ..content import json_value, text_content
-from ..model import Event, SourceFailure, SourceReport
+from ..model import Event, SourceReport
 from ..time import in_window, iso_timestamp
-from .common import read_jsonl
+from .common import collect_files, read_jsonl
 
 
 def collect_copilot(root: Path, since: datetime | None, until: datetime | None) -> SourceReport:
     files = sorted(root.glob("session-state/*/events.jsonl"))
-    if not root.exists() or not files:
-        return SourceReport("copilot", available=False)
-    events: list[Event] = []
-    failures: list[SourceFailure] = []
-    for path in files:
-        try:
-            events.extend(_read_session(path, since, until))
-        except (OSError, ValueError, json.JSONDecodeError) as exc:
-            failures.append(SourceFailure("copilot", str(path), str(exc)))
-    return SourceReport("copilot", available=True, events=tuple(events), failures=tuple(failures))
+    return collect_files("copilot", files if root.exists() else [], _read_session, since, until)
 
 
 def _read_session(path: Path, since: datetime | None, until: datetime | None) -> list[Event]:

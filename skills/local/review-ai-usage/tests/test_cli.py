@@ -78,6 +78,25 @@ def test_init_creates_local_config_and_state(tmp_path: Path, monkeypatch) -> Non
     assert state_value["machine"] == "personal"
 
 
+def test_init_accepts_source_overrides_and_workspace_exclusions(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path / "state-home"))
+    config = tmp_path / "config.toml"
+    source = tmp_path / "custom-codex"
+    source.mkdir()
+
+    result = CliRunner().invoke(main, [
+        "init", "--machine", "work", "--casebook", str(tmp_path / "usage.org"),
+        "--source-path", "codex", str(source),
+        "--exclude-workspace", "/confidential",
+        "--config", str(config),
+    ])
+
+    assert result.exit_code == 0
+    text = config.read_text(encoding="utf-8")
+    assert str(source) in text
+    assert 'excluded_workspaces = ["/confidential"]' in text
+
+
 def test_export_learnings_omits_pending_and_local_links(tmp_path: Path) -> None:
     casebook = tmp_path / "usage.org"
     casebook.write_text(
@@ -85,6 +104,7 @@ def test_export_learnings_omits_pending_and_local_links(tmp_path: Path) -> None:
         "** Keep verification bounded :LESSON:CONFIRMED:\n"
         ":PROPERTIES:\n:MACHINE: personal\n:CONFIRMED: 2026-09-22\n:EVIDENCE_COUNT: 3\n:SESSION_ID: secret\n:END:\n"
         "Use [[/private/work/case.org][the supporting case]].\n"
+        "Also see [[file:case.org][the relative case]].\n"
         "Details are at https://intranet.example/plan and token=super-secret-token.\n"
         "```\nquoted raw excerpt should stay local\n```\n"
         "See /Users/private/notes.org for the draft.\n"
@@ -97,6 +117,8 @@ def test_export_learnings_omits_pending_and_local_links(tmp_path: Path) -> None:
     assert result.exit_code == 0
     assert "Keep verification bounded" in result.stdout
     assert "supporting case" in result.stdout
+    assert "relative case" in result.stdout
+    assert "case.org" not in result.stdout
     assert "/private/work" not in result.stdout
     assert "SESSION_ID" not in result.stdout
     assert "Unconfirmed lesson" not in result.stdout
@@ -129,6 +151,30 @@ def test_deduplication_is_scoped_to_a_session(tmp_path: Path) -> None:
     )
 
     assert len(_filtered_events([report], config)) == 3
+
+
+def test_copilot_agent_events_deduplicate_across_storage_adapters(tmp_path: Path) -> None:
+    def event(source: str) -> Event:
+        return Event(
+            source=source,
+            interface="copilot-vscode-agent" if source == "copilot-vscode" else "copilot-cli",
+            session_id="shared-session",
+            turn_id="turn-1",
+            event_id="event-1",
+            timestamp="2026-09-22T10:00:00Z",
+            workspace="/work/project",
+            role="assistant",
+            event_kind="message",
+            text="Complete.",
+        )
+
+    config = Config("personal", tmp_path / "casebook.org", (), (), {}, tmp_path / "state.json")
+    reports = [
+        SourceReport("copilot", True, events=(event("copilot"),)),
+        SourceReport("copilot-vscode", True, events=(event("copilot-vscode"),)),
+    ]
+
+    assert len(_filtered_events(reports, config)) == 1
 
 
 def test_exclusion_keeps_sibling_paths(tmp_path: Path) -> None:

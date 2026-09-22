@@ -30,9 +30,11 @@ the detected sources so the user can review exclusions before the first scan.
 
 ## 2. Establish the boundary
 
-Read the state path shown by `ai-transcripts config`. Use each source's last
-successful watermark. A source without a watermark starts 24 hours before the
-run. A user-supplied period or source list overrides this boundary for the run.
+Read the state path shown by `ai-transcripts config`. The `collect` command is
+deliberately stateless: use each source's last successful watermark from the
+state index to calculate the boundary passed to it. A source without a
+watermark starts 24 hours before the run. A user-supplied period or source list
+overrides this boundary for the run.
 Resolve relative boundaries to timestamps and record those timestamps in the
 run manifest. Treat the first seven days as a supervised pilot; scan no earlier
 history unless the user asks for a bounded backfill.
@@ -99,9 +101,10 @@ Keep work content privacy-safe.
 Under `Extraction`, list every source as healthy, unavailable, or failed. Under
 `Conversations`, include a compact skipped list as well as included sessions.
 
-Read [the state contract](references/state.md). Write the run manifest beside
-the configured state file, then update the state index. Neither contains message
-text.
+Read [the state contract](references/state.md). After the pending Org run is
+written, write the run manifest beside the configured state file, then update
+the state index atomically. Neither contains message text. Do not advance state
+before the casebook and manifest exist; `collect` itself must not advance it.
 
 After the casebook and manifest both exist, advance watermarks for healthy
 sources to their latest emitted event. Leave failed-source watermarks unchanged.

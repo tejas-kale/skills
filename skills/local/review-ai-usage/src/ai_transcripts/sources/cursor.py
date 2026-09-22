@@ -7,24 +7,23 @@ from pathlib import Path
 from typing import Any
 
 from ..content import text_content
-from ..model import Event, SourceFailure, SourceReport
+from ..model import Event, SourceReport
 from ..time import in_window, iso_timestamp
+from .common import collect_files
 
 
 def collect_cursor(root: Path, since: datetime | None, until: datetime | None) -> SourceReport:
     chat_files = sorted(root.glob("chats/*/*/store.db"))
     acp_files = sorted(root.glob("acp-sessions/*/store.db"))
     files = chat_files + acp_files
-    if not root.exists() or not files:
-        return SourceReport("cursor-cli", available=False)
-    events: list[Event] = []
-    failures: list[SourceFailure] = []
-    for path in files:
-        try:
-            events.extend(_read_session(path, since, until))
-        except (OSError, ValueError, sqlite3.Error, json.JSONDecodeError) as exc:
-            failures.append(SourceFailure("cursor-cli", str(path), str(exc)))
-    return SourceReport("cursor-cli", available=True, events=tuple(events), failures=tuple(failures))
+    return collect_files(
+        "cursor-cli",
+        files if root.exists() else [],
+        _read_session,
+        since,
+        until,
+        (OSError, ValueError, TypeError, sqlite3.Error),
+    )
 
 
 def _metadata(path: Path) -> dict[str, Any]:
@@ -71,9 +70,6 @@ def _read_session(path: Path, since: datetime | None, until: datetime | None) ->
     session_id = str(meta.get("agentId") or path.parent.name)
     workspace = str(meta.get("cwd") or "")
     timestamp_value = meta.get("updatedAtMs") or path.stat().st_mtime
-    if not in_window(timestamp_value, since, until):
-        return []
-    timestamp = iso_timestamp(timestamp_value)
     interface = "cursor-acp" if "acp-sessions" in path.parts else "cursor-cli"
     messages = _message_rows(path)
     turn_number = 0
@@ -98,12 +94,17 @@ def _read_session(path: Path, since: datetime | None, until: datetime | None) ->
         for rowid, blob_id, message in rows:
             role = str(message.get("role"))
             content = message.get("content")
+            message_timestamp = message.get("timestamp") or message.get("createdAt") or message.get("createdAtMs")
+            event_timestamp_value = message_timestamp or timestamp_value
+            if not in_window(event_timestamp_value, since, until):
+                continue
+            event_timestamp = iso_timestamp(event_timestamp_value)
             common = dict(
                 source="cursor-cli",
                 interface=interface,
                 session_id=session_id,
                 turn_id=turn_id,
-                timestamp=timestamp,
+                timestamp=event_timestamp,
                 workspace=workspace,
                 completed=True,
                 source_metadata={"rowid": rowid},

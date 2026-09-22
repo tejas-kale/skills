@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import shutil
+import json
+import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -24,6 +26,22 @@ def test_codex_emits_only_completed_turn(tmp_path: Path, fixtures: Path) -> None
     assert report.available
     assert {event.turn_id for event in report.events} == {"codex-turn"}
     assert {event.event_kind for event in report.events} == {"message", "tool_call", "tool_result"}
+
+
+def test_codex_preserves_interface_value_from_source_metadata(tmp_path: Path) -> None:
+    target = tmp_path / "codex" / "sessions" / "2026" / "09" / "22"
+    target.mkdir(parents=True)
+    (target / "session.jsonl").write_text(
+        '{"type":"session_meta","payload":{"session_id":"s","source":{"type":"vscode"}}}\n'
+        '{"type":"turn_context","payload":{"turn_id":"t"}}\n'
+        '{"type":"response_item","timestamp":"2026-09-22T08:00:00Z","payload":{"type":"message","id":"m","role":"user","content":"hello"}}\n'
+        '{"type":"event_msg","payload":{"type":"task_complete","turn_id":"t"}}\n',
+        encoding="utf-8",
+    )
+
+    report = collect_codex(tmp_path / "codex", SINCE, UNTIL)
+
+    assert report.events[0].interface == "vscode"
 
 
 def test_claude_emits_messages_and_tools_from_completed_turn(tmp_path: Path, fixtures: Path) -> None:
@@ -60,6 +78,31 @@ def test_cursor_reads_json_blobs_read_only(cursor_root: Path) -> None:
     assert {event.turn_id for event in report.events} == {"turn-1"}
     assert {event.event_kind for event in report.events} == {"message", "tool_call", "tool_result"}
     assert database.read_bytes() == before
+
+
+def test_cursor_filters_messages_by_their_own_timestamps(tmp_path: Path) -> None:
+    session = tmp_path / "cursor" / "chats" / "workspace" / "session"
+    session.mkdir(parents=True)
+    (session / "meta.json").write_text(json.dumps({
+        "updatedAtMs": 1790074860000,
+        "cwd": "/work/project",
+    }), encoding="utf-8")
+    messages = [
+        {"role": "user", "content": "old", "timestamp": "2026-09-21T10:00:00Z"},
+        {"role": "assistant", "content": "old answer", "timestamp": "2026-09-21T10:01:00Z"},
+        {"role": "user", "content": "new", "timestamp": "2026-09-22T10:00:00Z"},
+        {"role": "assistant", "content": "new answer", "timestamp": "2026-09-22T10:01:00Z"},
+    ]
+    database = sqlite3.connect(session / "store.db")
+    database.execute("CREATE TABLE blobs (id TEXT PRIMARY KEY, data BLOB)")
+    for index, message in enumerate(messages):
+        database.execute("INSERT INTO blobs (id, data) VALUES (?, ?)", (f"blob-{index}", json.dumps(message).encode()))
+    database.commit()
+    database.close()
+
+    report = collect_cursor(tmp_path / "cursor", SINCE, UNTIL)
+
+    assert [event.text for event in report.events] == ["new", "new answer"]
 
 
 def test_vscode_reads_copilot_chat_transcripts(tmp_path: Path, fixtures: Path) -> None:

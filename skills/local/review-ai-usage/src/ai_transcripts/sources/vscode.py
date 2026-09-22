@@ -7,9 +7,9 @@ from pathlib import Path
 from typing import Any
 
 from ..content import json_value, text_content
-from ..model import Event, SourceFailure, SourceReport
+from ..model import Event, SourceReport
 from ..time import in_window, iso_timestamp
-from .common import read_jsonl
+from .common import collect_files, read_jsonl
 
 
 _CHAT_GLOBS = (
@@ -33,21 +33,16 @@ def collect_vscode(root: Path, since: datetime | None, until: datetime | None) -
         return SourceReport("copilot-vscode", available=False)
     chats = _discover(root, _CHAT_GLOBS)
     transcripts = _discover(root, _TRANSCRIPT_GLOBS)
+    chat_report = collect_files("copilot-vscode", chats, _read_session, since, until)
+    transcript_report = collect_files("copilot-vscode", transcripts, _read_transcript, since, until)
     if not chats and not transcripts:
         return SourceReport("copilot-vscode", available=False)
-    events: list[Event] = []
-    failures: list[SourceFailure] = []
-    for path in chats:
-        try:
-            events.extend(_read_session(path, since, until))
-        except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
-            failures.append(SourceFailure("copilot-vscode", str(path), str(exc)))
-    for path in transcripts:
-        try:
-            events.extend(_read_transcript(path, since, until))
-        except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
-            failures.append(SourceFailure("copilot-vscode", str(path), str(exc)))
-    return SourceReport("copilot-vscode", available=True, events=tuple(events), failures=tuple(failures))
+    return SourceReport(
+        "copilot-vscode",
+        available=True,
+        events=chat_report.events + transcript_report.events,
+        failures=chat_report.failures + transcript_report.failures,
+    )
 
 
 def _discover(root: Path, patterns: tuple[str, ...]) -> list[Path]:

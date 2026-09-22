@@ -5,23 +5,14 @@ from pathlib import Path
 from typing import Any
 
 from ..content import json_value, text_content
-from ..model import Event, SourceFailure, SourceReport
+from ..model import Event, SourceReport
 from ..time import in_window, iso_timestamp
-from .common import read_jsonl
+from .common import collect_files, read_jsonl
 
 
 def collect_codex(root: Path, since: datetime | None, until: datetime | None) -> SourceReport:
     files = sorted(root.glob("sessions/**/*.jsonl")) + sorted(root.glob("archived_sessions/*.jsonl"))
-    if not root.exists() or not files:
-        return SourceReport("codex", available=False)
-    events: list[Event] = []
-    failures: list[SourceFailure] = []
-    for path in files:
-        try:
-            events.extend(_read_session(path, since, until))
-        except (OSError, ValueError) as exc:
-            failures.append(SourceFailure("codex", str(path), str(exc)))
-    return SourceReport("codex", available=True, events=tuple(events), failures=tuple(failures))
+    return collect_files("codex", files if root.exists() else [], _read_session, since, until)
 
 
 def _read_session(path: Path, since: datetime | None, until: datetime | None) -> list[Event]:
@@ -40,7 +31,7 @@ def _read_session(path: Path, since: datetime | None, until: datetime | None) ->
             session_id = str(payload.get("session_id") or payload.get("id") or session_id)
             workspace = str(payload.get("cwd") or "")
             source_value = payload.get("source") or payload.get("originator") or "codex"
-            interface = next(iter(source_value), "codex") if isinstance(source_value, dict) else str(source_value)
+            interface = next(iter(source_value.values()), "codex") if isinstance(source_value, dict) else str(source_value)
         elif kind == "turn_context":
             current_turn = str(payload.get("turn_id") or current_turn)
             workspace = str(payload.get("cwd") or workspace)

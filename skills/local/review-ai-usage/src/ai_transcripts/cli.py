@@ -23,12 +23,33 @@ def main() -> None:
 @main.command("init")
 @click.option("--machine", required=True, type=click.Choice(["personal", "work"]))
 @click.option("--casebook", required=True, type=click.Path(path_type=Path))
+@click.option(
+    "--source-path", "source_paths", multiple=True, nargs=2,
+    type=(click.Choice(SOURCE_NAMES), click.Path(path_type=Path)),
+    help="Override a source path; may be repeated.",
+)
+@click.option(
+    "--exclude-workspace", "excluded_workspaces", multiple=True,
+    help="Exclude a workspace prefix; may be repeated.",
+)
 @click.option("--config", "config_path", type=click.Path(path_type=Path), default=default_config_path, show_default=True)
-def initialise(machine: str, casebook: Path, config_path: Path) -> None:
+def initialise(
+    machine: str,
+    casebook: Path,
+    source_paths: tuple[tuple[str, Path], ...],
+    excluded_workspaces: tuple[str, ...],
+    config_path: Path,
+) -> None:
     """Create machine-local configuration and state."""
     if config_path.exists():
         raise click.ClickException(f"Configuration already exists: {config_path}")
-    config = write_config(config_path, machine=machine, casebook=casebook)
+    config = write_config(
+        config_path,
+        machine=machine,
+        casebook=casebook,
+        source_paths=dict(source_paths),
+        excluded_workspaces=excluded_workspaces,
+    )
     click.echo(f"Configuration: {config_path}")
     click.echo(f"State: {config.state_path}")
     detected = [name for name in config.enabled_sources if config.source_paths[name].exists()]
@@ -100,13 +121,14 @@ def collect(since: str | None, until: str | None, sources: tuple[str, ...], outp
 
 def _filtered_events(reports: list[SourceReport], config: Config) -> list[Event]:
     excluded = tuple(os.path.normpath(str(Path(value).expanduser())) for value in config.excluded_workspaces)
-    seen: set[tuple[str, str, str]] = set()
+    seen: set[tuple[str, str, str, str]] = set()
     result: list[Event] = []
     for report in reports:
         for event in report.events:
             if _workspace_excluded(event.workspace, excluded):
                 continue
-            identity = (event.session_id, event.event_kind, event.event_id)
+            source = "copilot" if event.source in {"copilot", "copilot-vscode"} else event.source
+            identity = (source, event.session_id, event.event_kind, event.event_id)
             if identity in seen:
                 continue
             seen.add(identity)
