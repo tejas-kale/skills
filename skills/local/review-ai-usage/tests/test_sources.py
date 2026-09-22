@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import shutil
 import json
+import shutil
 import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
@@ -67,6 +67,58 @@ def test_copilot_classifies_vscode_agent_and_deduplicates_store(tmp_path: Path, 
     assert report.events
     assert {event.interface for event in report.events} == {"copilot-vscode-agent"}
     assert len({event.event_id for event in report.events}) == len(report.events)
+
+
+def test_cursor_collects_messages_from_mixed_blobs(tmp_path: Path) -> None:
+    session = tmp_path / "cursor" / "chats" / "workspace" / "mixed-session"
+    session.mkdir(parents=True)
+    (session / "meta.json").write_text(json.dumps({
+        "schemaVersion": 1,
+        "createdAtMs": 1790074800000,
+        "updatedAtMs": 1790074860000,
+        "hasConversation": True,
+        "cwd": "/work/project",
+    }), encoding="utf-8")
+    jsonl = "\n".join([
+        json.dumps({
+            "role": "assistant",
+            "content": [{
+                "type": "tool-call",
+                "toolCallId": "cursor-tool",
+                "toolName": "read_file",
+                "input": {"path": "config"},
+            }],
+        }),
+        json.dumps({
+            "role": "tool",
+            "content": [{"type": "tool-result", "toolCallId": "cursor-tool", "output": "configuration"}],
+        }),
+        json.dumps({
+            "role": "assistant",
+            "content": [{"type": "text", "text": "The configuration is valid."}],
+        }),
+    ])
+    blobs = [
+        ("message", json.dumps({"role": "user", "content": "Inspect the configuration."}).encode()),
+        ("jsonl", jsonl.encode()),
+        ("template", b"{{ define \"layout\" }}\n{{ .Title }}\n"),
+    ]
+    connection = sqlite3.connect(session / "store.db")
+    connection.execute("CREATE TABLE blobs (id TEXT PRIMARY KEY, data BLOB)")
+    connection.executemany("INSERT INTO blobs (id, data) VALUES (?, ?)", blobs)
+    connection.commit()
+    connection.close()
+
+    report = collect_cursor(tmp_path / "cursor", SINCE, UNTIL)
+
+    assert report.failures == ()
+    assert {event.event_kind for event in report.events} == {"message", "tool_call", "tool_result"}
+    assert {event.text for event in report.events if event.text} == {
+        "Inspect the configuration.",
+        "The configuration is valid.",
+    }
+    assert {event.tool_name for event in report.events if event.tool_name} == {"read_file"}
+    assert all("{{" not in event.text for event in report.events)
 
 
 def test_cursor_reads_json_blobs_read_only(cursor_root: Path) -> None:
