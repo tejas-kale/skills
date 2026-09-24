@@ -11,4 +11,5 @@ Skills authored in this repo live here.
 | `inquiring` | Shared understanding of a problem through a claim tree of evidence |
 | `macos-disk-cleanup` | Triage and reclaim disk space on macOS |
 | `review-ai-usage` | Review local AI-agent transcripts into a personal Org casebook |
+| `review-dashboard-widgets` | Audit a Databricks Lakeview dashboard's widgets against their SQL |
 | `workers-best-practices` | Author and review Cloudflare Workers code against production rules |
