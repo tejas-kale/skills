@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "skills": {
+    "doom-literate-config": {
+      "source": "tejas-kale/skills",
+      "sourceType": "github",
+      "skillPath": "skills/local/doom-literate-config/SKILL.md",
+      "computedHash": "4d2ce6a80b0a8268e90b32c9389e9fd8657ff4b3a57a8865423b02953d72b2bc"
+    },
+    "german-shopping-receipts": {
+      "source": "tejas-kale/skills",
+      "sourceType": "github",
+      "skillPath": "skills/local/german-shopping-receipts/SKILL.md",
+      "computedHash": "197e56fc3b706436a71ac494b3d50a1cbb2a90efc1f7a1a80aec5e465f03a998"
+    },
+    "grill-to-plan": {
+      "source": "tejas-kale/skills",
+      "sourceType": "github",
+      "skillPath": "skills/local/grill-to-plan/SKILL.md",
+      "computedHash": "3328a838fd23699d2762659784348cf858a1497c472173fcd261c7e01535add3"
+    },
+    "harvest": {
+      "source": "tejas-kale/skills",
+      "sourceType": "github",
+      "skillPath": "skills/local/harvest/SKILL.md",
+      "computedHash": "cdb9cb035f9fcdce653f4eade427864f7967fab15abddf1ed5848229f406de98"
+    },
+    "inquire-me": {
+      "source": "tejas-kale/skills",
+      "sourceType": "github",
+      "skillPath": "skills/local/inquire-me/SKILL.md",
+      "computedHash": "9aa998ff82c92fefb8589d01232d8aaa4f436e77eea6499922f535b80367809d"
+    },
+    "inquiring": {
+      "source": "tejas-kale/skills",
+      "sourceType": "github",
+      "skillPath": "skills/local/inquiring/SKILL.md",
+      "computedHash": "97acf41791141329a52168c830b03dca40217bb2a591a98678c6e33e2e3f99ae"
+    },
+    "macos-disk-cleanup": {
+      "source": "tejas-kale/skills",
+      "sourceType": "github",
+      "skillPath": "skills/local/macos-disk-cleanup/SKILL.md",
+      "computedHash": "86f9f31f7ff9aeca46ed33f9ccef9ec47ae5e68a89ad01034361afe6a0cbddde"
+    },
+    "workers-best-practices": {
+      "source": "tejas-kale/skills",
+      "sourceType": "github",
+      "skillPath": "skills/local/workers-best-practices/SKILL.md",
+      "computedHash": "8d8522d415516d194cfd75c34344f9be640c3c1cfdb8e3c89df3d51f5e88ec13"
+    }
+  }
+}

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Inquire Me"
+  short_description: "Shared understanding of a problem through data"
+policy:
+  allow_implicit_invocation: false

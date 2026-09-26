@@ -4,6 +4,7 @@ Skills authored in this repo live here.
 
 | Skill | Purpose |
 | --- | --- |
+| `causal-paper-advice` | Interrogate a causal paper and derive proportionate advice |
 | `doom-literate-config` | Change a Doom Emacs literate `config.org` setup without losing tangled state |
 | `german-shopping-receipts` | Query the `german_shopping_receipts` BigQuery table with `bq` |
 | `grill-to-plan` | Grill data-analysis or software work into an agreed plan for delegation |
