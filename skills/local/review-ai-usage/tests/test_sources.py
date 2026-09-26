@@ -11,6 +11,7 @@ from ai_transcripts.sources.claude_code import collect_claude_code
 from ai_transcripts.sources.codex import collect_codex
 from ai_transcripts.sources.copilot import collect_copilot
 from ai_transcripts.sources.cursor import collect_cursor
+from ai_transcripts.sources.pi import collect_pi
 from ai_transcripts.sources.vscode import collect_vscode
 
 SINCE = datetime(2026, 9, 22, 0, 0, tzinfo=UTC)
@@ -253,3 +254,178 @@ def test_vscode_replays_snapshot_and_ignores_incomplete_request(tmp_path: Path, 
 
     assert {event.turn_id for event in report.events} == {"vscode-turn"}
     assert [event.role for event in report.events] == ["user", "assistant"]
+
+
+def test_pi_emits_messages_and_tools_from_completed_turn(tmp_path: Path) -> None:
+    session_dir = tmp_path / "pi" / "sessions" / "--work-project--"
+    session_dir.mkdir(parents=True)
+    lines = [
+        '{"type":"session","version":3,"id":"pi-session-1","timestamp":"2026-09-22T10:00:00.000Z","cwd":"/work/project"}',
+        '{"type":"message","id":"entry-0","parentId":null,"timestamp":"2026-09-22T10:00:00.000Z","message":{"role":"system","content":"prompt","timestamp":1790071200000}}',
+        '{"type":"message","id":"entry-1","parentId":"entry-0","timestamp":"2026-09-22T10:00:01.000Z","message":{"role":"user","content":"Run the tests.","timestamp":1790071201000}}',
+        '{"type":"message","id":"entry-2","parentId":"entry-1","timestamp":"2026-09-22T10:00:02.000Z","message":{"role":"assistant","content":[{"type":"text","text":"Running tests."},{"type":"toolCall","id":"call-1","name":"bash","arguments":{"command":"pytest"}}],"stopReason":"toolUse","timestamp":1790071202000}}',
+        '{"type":"message","id":"entry-3","parentId":"entry-2","timestamp":"2026-09-22T10:00:03.000Z","message":{"role":"toolResult","toolCallId":"call-1","toolName":"bash","content":[{"type":"text","text":"1 passed"}],"isError":false,"timestamp":1790071203000}}',
+        '{"type":"message","id":"entry-4","parentId":"entry-3","timestamp":"2026-09-22T10:00:04.000Z","message":{"role":"assistant","content":[{"type":"thinking","thinking":"tests passed."},{"type":"text","text":"Tests passed successfully."}],"stopReason":"stop","timestamp":1790071204000}}',
+    ]
+    (session_dir / "2026-09-22T10-00-00_pi-session-1.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    report = collect_pi(tmp_path / "pi", SINCE, UNTIL)
+
+    assert report.available
+    assert {event.session_id for event in report.events} == {"pi-session-1"}
+    assert {event.workspace for event in report.events} == {"/work/project"}
+    assert {event.turn_id for event in report.events} == {"entry-1"}
+    assert [event.event_kind for event in report.events] == ["message", "message", "tool_call", "tool_result", "message"]
+    assert [event.role for event in report.events] == ["user", "assistant", "assistant", "tool", "assistant"]
+    assert [event.text for event in report.events if event.event_kind == "message"] == [
+        "Run the tests.",
+        "Running tests.",
+        "Tests passed successfully.",
+    ]
+    tool_call = next(e for e in report.events if e.event_kind == "tool_call")
+    assert tool_call.tool_name == "bash"
+    assert tool_call.tool_input == {"command": "pytest"}
+    tool_result = next(e for e in report.events if e.event_kind == "tool_result")
+    assert tool_result.tool_result == "1 passed"
+
+
+def test_pi_ignores_incomplete_turn(tmp_path: Path) -> None:
+    session_dir = tmp_path / "pi" / "sessions" / "--work-project--"
+    session_dir.mkdir(parents=True)
+    lines = [
+        '{"type":"session","version":3,"id":"pi-session-2","timestamp":"2026-09-22T10:00:00.000Z","cwd":"/work/project"}',
+        '{"type":"message","id":"entry-1","parentId":null,"timestamp":"2026-09-22T10:00:01.000Z","message":{"role":"user","content":"Start something.","timestamp":1790071201000}}',
+        '{"type":"message","id":"entry-2","parentId":"entry-1","timestamp":"2026-09-22T10:00:02.000Z","message":{"role":"assistant","content":[{"type":"text","text":"Working on it..."}],"stopReason":"toolUse","timestamp":1790071202000}}',
+    ]
+    (session_dir / "2026-09-22T10-00-00_pi-session-2.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    report = collect_pi(tmp_path / "pi", SINCE, UNTIL)
+
+    assert report.available
+    assert report.events == ()
+
+
+def test_pi_handles_bash_execution_messages(tmp_path: Path) -> None:
+    session_dir = tmp_path / "pi" / "sessions" / "--work-project--"
+    session_dir.mkdir(parents=True)
+    lines = [
+        '{"type":"session","version":3,"id":"pi-session-3","timestamp":"2026-09-22T10:00:00.000Z","cwd":"/work/project"}',
+        '{"type":"message","id":"entry-1","parentId":null,"timestamp":"2026-09-22T10:00:01.000Z","message":{"role":"user","content":"Run the script.","timestamp":1790071201000}}',
+        '{"type":"message","id":"entry-2","parentId":"entry-1","timestamp":"2026-09-22T10:00:02.000Z","message":{"role":"bashExecution","command":"python script.py","output":"hello\\nworld","exitCode":0,"timestamp":1790071202000}}',
+        '{"type":"message","id":"entry-3","parentId":"entry-2","timestamp":"2026-09-22T10:00:03.000Z","message":{"role":"assistant","content":[{"type":"text","text":"Done."}],"stopReason":"stop","timestamp":1790071203000}}',
+    ]
+    (session_dir / "2026-09-22T10-00-00_pi-session-3.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    report = collect_pi(tmp_path / "pi", SINCE, UNTIL)
+
+    assert report.available
+    assert {event.turn_id for event in report.events} == {"entry-1"}
+    kinds = [event.event_kind for event in report.events]
+    assert kinds == ["message", "tool_call", "tool_result", "message"]
+    assert [event.role for event in report.events] == ["user", "assistant", "tool", "assistant"]
+    tool_call = next(e for e in report.events if e.event_kind == "tool_call")
+    assert tool_call.tool_name == "bash"
+    assert tool_call.tool_input == {"command": "python script.py"}
+    tool_result = next(e for e in report.events if e.event_kind == "tool_result")
+    assert tool_result.tool_result == "hello\nworld\n[exit 0]"
+
+
+def test_pi_reads_legacy_session_layout(tmp_path: Path) -> None:
+    (tmp_path / "pi").mkdir()
+    lines = [
+        '{"type":"session","version":3,"id":"pi-session-legacy","timestamp":"2026-09-22T10:00:00.000Z","cwd":"/work/project"}',
+        '{"type":"message","id":"entry-1","parentId":null,"timestamp":"2026-09-22T10:00:01.000Z","message":{"role":"user","content":"Legacy layout.","timestamp":1790071201000}}',
+        '{"type":"message","id":"entry-2","parentId":"entry-1","timestamp":"2026-09-22T10:00:02.000Z","message":{"role":"assistant","content":[{"type":"text","text":"Noted."}],"stopReason":"stop","timestamp":1790071202000}}',
+    ]
+    (tmp_path / "pi" / "legacy.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    report = collect_pi(tmp_path / "pi", SINCE, UNTIL)
+
+    assert report.available
+    assert {event.session_id for event in report.events} == {"pi-session-legacy"}
+    assert {event.turn_id for event in report.events} == {"entry-1"}
+    assert [event.text for event in report.events if event.event_kind == "message"] == ["Legacy layout.", "Noted."]
+
+
+def test_pi_filters_by_time_window(tmp_path: Path) -> None:
+    session_dir = tmp_path / "pi" / "sessions" / "--work-project--"
+    session_dir.mkdir(parents=True)
+    lines = [
+        '{"type":"session","version":3,"id":"pi-session-4","timestamp":"2026-09-21T10:00:00.000Z","cwd":"/work/project"}',
+        '{"type":"message","id":"entry-1","parentId":null,"timestamp":"2026-09-21T10:00:01.000Z","message":{"role":"user","content":"Old.","timestamp":1790071201000}}',
+        '{"type":"message","id":"entry-2","parentId":"entry-1","timestamp":"2026-09-21T10:00:02.000Z","message":{"role":"assistant","content":[{"type":"text","text":"Old answer."}],"stopReason":"stop","timestamp":1790071202000}}',
+        '{"type":"message","id":"entry-3","parentId":null,"timestamp":"2026-09-22T10:00:01.000Z","message":{"role":"user","content":"New.","timestamp":1790071203000}}',
+        '{"type":"message","id":"entry-4","parentId":"entry-3","timestamp":"2026-09-22T10:00:02.000Z","message":{"role":"assistant","content":[{"type":"text","text":"New answer."}],"stopReason":"stop","timestamp":1790071204000}}',
+    ]
+    (session_dir / "2026-09-22T10-00-00_pi-session-4.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    report = collect_pi(tmp_path / "pi", SINCE, UNTIL)
+
+    assert [event.text for event in report.events if event.event_kind == "message"] == ["New.", "New answer."]
+
+
+def test_pi_omits_thinking_blocks(tmp_path: Path) -> None:
+    session_dir = tmp_path / "pi" / "sessions" / "--work-project--"
+    session_dir.mkdir(parents=True)
+    lines = [
+        '{"type":"session","version":3,"id":"pi-session-5","timestamp":"2026-09-22T10:00:00.000Z","cwd":"/work/project"}',
+        '{"type":"message","id":"entry-1","parentId":null,"timestamp":"2026-09-22T10:00:01.000Z","message":{"role":"user","content":"Think.","timestamp":1790071201000}}',
+        '{"type":"message","id":"entry-2","parentId":"entry-1","timestamp":"2026-09-22T10:00:02.000Z","message":{"role":"assistant","content":[{"type":"thinking","thinking":"secret"},{"type":"text","text":"visible"}],"stopReason":"stop","timestamp":1790071202000}}',
+    ]
+    (session_dir / "2026-09-22T10-00-00_pi-session-5.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    report = collect_pi(tmp_path / "pi", SINCE, UNTIL)
+
+    assert [event.text for event in report.events if event.event_kind == "message"] == ["Think.", "visible"]
+    assert "secret" not in {event.text for event in report.events}
+
+
+def test_pi_handles_error_stop_reason(tmp_path: Path) -> None:
+    session_dir = tmp_path / "pi" / "sessions" / "--work-project--"
+    session_dir.mkdir(parents=True)
+    lines = [
+        '{"type":"session","version":3,"id":"pi-session-6","timestamp":"2026-09-22T10:00:00.000Z","cwd":"/work/project"}',
+        '{"type":"message","id":"entry-1","parentId":null,"timestamp":"2026-09-22T10:00:01.000Z","message":{"role":"user","content":"Fail.","timestamp":1790071201000}}',
+        '{"type":"message","id":"entry-2","parentId":"entry-1","timestamp":"2026-09-22T10:00:02.000Z","message":{"role":"assistant","content":[{"type":"text","text":"Error occurred."}],"stopReason":"error","timestamp":1790071202000}}',
+    ]
+    (session_dir / "2026-09-22T10-00-00_pi-session-6.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    report = collect_pi(tmp_path / "pi", SINCE, UNTIL)
+
+    assert report.available
+    assert {event.turn_id for event in report.events} == {"entry-1"}
+    assert [event.text for event in report.events if event.event_kind == "message"] == ["Fail.", "Error occurred."]
+
+
+def test_pi_handles_aborted_stop_reason(tmp_path: Path) -> None:
+    session_dir = tmp_path / "pi" / "sessions" / "--work-project--"
+    session_dir.mkdir(parents=True)
+    lines = [
+        '{"type":"session","version":3,"id":"pi-session-7","timestamp":"2026-09-22T10:00:00.000Z","cwd":"/work/project"}',
+        '{"type":"message","id":"entry-1","parentId":null,"timestamp":"2026-09-22T10:00:01.000Z","message":{"role":"user","content":"Abort me.","timestamp":1790071201000}}',
+        '{"type":"message","id":"entry-2","parentId":"entry-1","timestamp":"2026-09-22T10:00:02.000Z","message":{"role":"assistant","content":[{"type":"text","text":"Aborted."}],"stopReason":"aborted","timestamp":1790071202000}}',
+    ]
+    (session_dir / "2026-09-22T10-00-00_pi-session-7.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    report = collect_pi(tmp_path / "pi", SINCE, UNTIL)
+
+    assert report.available
+    assert {event.turn_id for event in report.events} == {"entry-1"}
+    assert [event.text for event in report.events if event.event_kind == "message"] == ["Abort me.", "Aborted."]
+
+
+def test_pi_handles_end_turn_flag(tmp_path: Path) -> None:
+    session_dir = tmp_path / "pi" / "sessions" / "--work-project--"
+    session_dir.mkdir(parents=True)
+    lines = [
+        '{"type":"session","version":3,"id":"pi-session-8","timestamp":"2026-09-22T10:00:00.000Z","cwd":"/work/project"}',
+        '{"type":"message","id":"entry-1","parentId":null,"timestamp":"2026-09-22T10:00:01.000Z","message":{"role":"user","content":"End turn.","timestamp":1790071201000}}',
+        '{"type":"message","id":"entry-2","parentId":"entry-1","timestamp":"2026-09-22T10:00:02.000Z","message":{"role":"assistant","content":[{"type":"text","text":"Done."}],"endTurn":true,"timestamp":1790071202000}}',
+    ]
+    (session_dir / "2026-09-22T10-00-00_pi-session-8.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    report = collect_pi(tmp_path / "pi", SINCE, UNTIL)
+
+    assert report.available
+    assert {event.turn_id for event in report.events} == {"entry-1"}
+    assert [event.text for event in report.events if event.event_kind == "message"] == ["End turn.", "Done."]

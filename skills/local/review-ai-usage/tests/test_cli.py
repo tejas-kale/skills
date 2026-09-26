@@ -234,3 +234,59 @@ def test_deduplication_ignores_adapter_source(tmp_path: Path) -> None:
 
     assert len(result) == 1
     assert result[0].source == "copilot"
+
+
+def test_collect_with_pi_source(tmp_path: Path) -> None:
+    pi_root = tmp_path / "pi" / "sessions" / "--work-project--"
+    pi_root.mkdir(parents=True)
+    lines = [
+        '{"type":"session","version":3,"id":"pi-cli-session","timestamp":"2026-09-22T10:00:00.000Z","cwd":"/work/project"}',
+        '{"type":"message","id":"entry-1","parentId":null,"timestamp":"2026-09-22T10:00:01.000Z","message":{"role":"user","content":"CLI test.","timestamp":1790071201000}}',
+        '{"type":"message","id":"entry-2","parentId":"entry-1","timestamp":"2026-09-22T10:00:02.000Z","message":{"role":"assistant","content":[{"type":"text","text":"Done via CLI."}],"stopReason":"stop","timestamp":1790071202000}}',
+    ]
+    (pi_root / "2026-09-22T10-00-00_pi-cli-session.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    config = tmp_path / "config.toml"
+    write_config(config, tmp_path / "casebook.org", {"pi": tmp_path / "pi"})
+
+    result = CliRunner().invoke(main, [
+        "collect", "--config", str(config), "--since", "2026-09-22", "--until", "2026-09-23",
+        "--source", "pi",
+    ])
+
+    assert result.exit_code == 0
+    records = [json.loads(line) for line in result.stdout.splitlines()]
+    assert len(records) == 2
+    assert records[0]["text"] == "CLI test."
+    assert records[1]["text"] == "Done via CLI."
+    assert all(r["source"] == "pi" for r in records)
+    assert "OK pi" in result.stderr
+
+
+def test_init_detects_pi_source(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path / "state-home"))
+    pi_root = tmp_path / "pi" / "agent"
+    pi_root.mkdir(parents=True)
+    config = tmp_path / "config.toml"
+    casebook = tmp_path / "usage.org"
+
+    result = CliRunner().invoke(main, [
+        "init", "--machine", "personal", "--casebook", str(casebook), "--config", str(config),
+    ])
+
+    assert result.exit_code == 0
+    assert "pi" in result.stdout
+    assert "Detected sources:" in result.stdout
+
+
+def test_config_shows_pi_source_path(tmp_path: Path) -> None:
+    pi_root = tmp_path / "custom-pi"
+    pi_root.mkdir()
+    config = tmp_path / "config.toml"
+    write_config(config, tmp_path / "casebook.org", {"pi": pi_root})
+
+    result = CliRunner().invoke(main, ["config", "--config", str(config)])
+
+    assert result.exit_code == 0
+    data = json.loads(result.stdout)
+    assert data["source_paths"]["pi"] == str(pi_root)
+    assert "pi" in data["enabled_sources"]

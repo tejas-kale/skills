@@ -3,6 +3,7 @@ from .claude_code import collect_claude_code
 from .codex import collect_codex
 from .copilot import collect_copilot
 from .cursor import collect_cursor
+from .pi import collect_pi
 from .vscode import collect_vscode
 
 COLLECTORS = {
@@ -12,6 +13,7 @@ COLLECTORS = {
     "cursor-cli": collect_cursor,
     "copilot-vscode": collect_vscode,
     "antigravity-cli": collect_antigravity,
+    "pi": collect_pi,
 }
 
 __all__ = ["COLLECTORS"]

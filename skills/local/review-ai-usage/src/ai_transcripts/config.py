@@ -7,7 +7,7 @@ import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 
-SOURCE_NAMES = ("codex", "claude-code", "copilot", "cursor-cli", "copilot-vscode", "antigravity-cli")
+SOURCE_NAMES = ("codex", "claude-code", "copilot", "cursor-cli", "copilot-vscode", "antigravity-cli", "pi")
 
 
 def default_config_path() -> Path:
@@ -28,6 +28,7 @@ def default_source_paths() -> dict[str, Path]:
         "cursor-cli": home / ".cursor",
         "copilot-vscode": home / "Library" / "Application Support" / "Code" / "User",
         "antigravity-cli": home / ".gemini" / "antigravity-cli",
+        "pi": home / ".pi" / "agent",
     }
 
 
