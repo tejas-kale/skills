@@ -1,0 +1,5 @@
+interface:
+  display_name: "macOS Disk Cleanup"
+  short_description: "Safely reclaim space on a Mac"
+policy:
+  allow_implicit_invocation: true

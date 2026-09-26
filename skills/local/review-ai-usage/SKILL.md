@@ -7,8 +7,8 @@ disable-model-invocation: true
 # Review AI usage
 
 Review newly completed work from Codex, Claude Code, Copilot CLI, Cursor CLI,
-and Copilot in VS Code. Keep transcripts, configuration, state, manifests, and
-the casebook on this machine.
+Copilot in VS Code, and Antigravity CLI. Keep transcripts, configuration,
+state, manifests, and the casebook on this machine.
 
 The directory containing this file is the **skill directory**.
 
