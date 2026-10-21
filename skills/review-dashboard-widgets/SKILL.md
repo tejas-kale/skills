@@ -1,7 +1,6 @@
 ---
 name: review-dashboard-widgets
-description: Audit a Databricks Lakeview dashboard's widgets against the SQL that actually powers them, producing a findings document of claim vs. compute.
-disable-model-invocation: true
+description: Audit a Databricks Lakeview dashboard's widgets against the SQL that actually powers them, producing a findings document of claim vs. compute. Use when the user asks to review, audit, check or verify an existing dashboard's widgets, charts or numbers, or whether a dashboard shows what its titles claim.
 ---
 
 # Review dashboard widgets
