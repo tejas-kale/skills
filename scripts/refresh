@@ -1,0 +1,175 @@
+#!/bin/bash
+# refresh                                  check manifest.tsv and the skill dirs, then link them into the agent skill dirs
+# refresh --bump <name|all> [ref]          3-way merge upstream changes into skills copied from an upstream (no commit)
+# refresh --add <name> <owner/repo> <path-in-repo> [ref]   copy one more upstream skill into skills/<name>
+#   ref: a tag, branch or commit. Default: the latest vX.Y.Z tag, else the default branch.
+# Env: SKILL_LINK_DIRS (colon-separated, default ~/.claude/skills:~/.agents/skills),
+#      UPSTREAM_URL_BASE (default https://github.com).
+ROOT=$(cd "$(dirname "$0")/.." && pwd -P)
+MANIFEST=$ROOT/manifest.tsv
+LINK_DIRS=${SKILL_LINK_DIRS:-$HOME/.claude/skills:$HOME/.agents/skills}
+UPSTREAM=${UPSTREAM_URL_BASE:-https://github.com}
+TAB=$(printf '\t')
+TMP=
+die() { echo "refresh: $*" >&2; exit 1; }
+tmpdir() { [ -n "$TMP" ] || { TMP=$(mktemp -d "${TMPDIR:-/tmp}/refresh.XXXXXX") || exit 1; trap 'rm -rf "${TMP:?}"' EXIT; }; }
+
+# ---- check ----
+skill_dirs() { for d in "$ROOT"/skills/*/ "$ROOT"/host/*/; do [ -d "$d" ] && { d=${d%/}; echo "$d"; }; done; }
+
+check() {
+  bad=0
+  [ -f "$MANIFEST" ] || die "missing manifest.tsv"
+  [ "$(head -1 "$MANIFEST")" = "name${TAB}repo${TAB}path${TAB}commit" ] || { echo "manifest.tsv: bad header" >&2; bad=1; }
+  seen=
+  while IFS="$TAB" read -r name repo path commit extra; do
+    [ -n "$name$repo$path$commit" ] || continue
+    if [ -z "$name" ] || [ -z "$repo" ] || [ -z "$path" ] || [ -z "$commit" ] || [ -n "$extra" ]; then
+      echo "manifest.tsv: row needs exactly 4 fields: $name" >&2; bad=1; continue
+    fi
+    case $repo in */*) ;; *) echo "manifest.tsv: $name: repo should be owner/repo" >&2; bad=1;; esac
+    case $commit in *[!0-9a-f]*|'') echo "manifest.tsv: $name: commit is not a hex SHA" >&2; bad=1;; esac
+    [ ${#commit} -eq 40 ] || { echo "manifest.tsv: $name: commit is not 40 characters" >&2; bad=1; }
+    case " $seen " in *" $name "*) echo "manifest.tsv: $name listed twice" >&2; bad=1;; esac
+    seen="$seen $name"
+    [ -d "$ROOT/skills/$name" ] || [ -d "$ROOT/host/$name" ] || { echo "manifest.tsv: $name has no dir in skills/ or host/" >&2; bad=1; }
+  done < <(tail -n +2 "$MANIFEST")
+  for d in $(skill_dirs); do
+    n=$(basename "$d")
+    [ -f "$d/SKILL.md" ] || { echo "$d: no SKILL.md" >&2; bad=1; continue; }
+    fm=$(awk 'NR==1&&$0!="---"{exit} NR>1&&$0=="---"{exit} NR>1&&/^name:/{sub(/^name:[ ]*/,"");print;exit}' "$d/SKILL.md")
+    [ "$fm" = "$n" ] || { echo "$d/SKILL.md: name '$fm' does not match the dir" >&2; bad=1; }
+    if [ -d "$ROOT/skills/$n" ] && [ -d "$ROOT/host/$n" ]; then
+      [ "$d" = "$ROOT/skills/$n" ] && { echo "name clash: $n is in both skills/ and host/" >&2; bad=1; }
+    fi
+  done
+  return $bad
+}
+
+# ---- link ----
+link() {
+  rc=0; n=0
+  IFS=: read -r -a targets <<< "$LINK_DIRS"
+  for t in "${targets[@]}"; do
+    mkdir -p "$t" || { rc=1; continue; }
+    for d in $(skill_dirs); do
+      l=$t/$(basename "$d")
+      if [ -L "$l" ]; then
+        cur=$(readlink "$l")
+        [ "$cur" = "$d" ] && continue
+        case $cur in
+          "$ROOT"/skills/*|"$ROOT"/host/*) ln -sfn "$d" "$l" && n=$((n+1));;   # moved between skills/ and host/
+          *) echo "conflict: $l is a symlink to $cur, left alone" >&2; rc=1;;
+        esac
+      elif [ -e "$l" ]; then
+        echo "conflict: $l exists and is not a symlink, left alone" >&2; rc=1
+      else
+        ln -s "$d" "$l" && n=$((n+1))
+      fi
+    done
+    for l in "$t"/*; do   # drop links into this checkout whose skill is gone; nothing else is touched
+      [ -L "$l" ] || continue
+      cur=$(readlink "$l")
+      case $cur in "$ROOT"/skills/*|"$ROOT"/host/*) [ -d "$cur" ] || { rm -f "$l" && echo "removed stale link $l" && n=$((n+1)); };; esac
+    done
+  done
+  echo "linked: $n change(s) in $LINK_DIRS"
+  return $rc
+}
+
+# ---- upstream helpers ----
+fetch_repo() { # <owner/repo> -> sets CLONE (one blobless clone per repo and run)
+  tmpdir; CLONE=$TMP/$(echo "$1" | tr / _)
+  [ -d "$CLONE" ] || git clone -q --filter=blob:none --no-checkout "$UPSTREAM/$1" "$CLONE" || die "cannot clone $1"
+}
+resolve() { # <clone> [ref] -> prints the commit SHA
+  if [ -n "$2" ]; then
+    git -C "$1" rev-parse -q --verify "$2^{commit}" || git -C "$1" rev-parse -q --verify "origin/$2^{commit}" || return 1
+    return
+  fi
+  tag=$(git -C "$1" tag --sort=-v:refname | grep -E '^v?[0-9]+\.[0-9]+(\.[0-9]+)?$' | head -1)
+  git -C "$1" rev-parse "${tag:-HEAD}^{commit}"
+}
+extract() { # <clone> <sha> <path> <dest>: the files of <path> at <sha>, modes kept
+  mkdir -p "$4" && git -C "$1" archive "$2" -- "$3" | tar -x -C "$4"
+}
+set_commit() { # <name> <sha>
+  awk -F'\t' -v OFS='\t' -v n="$1" -v c="$2" '$1==n{$4=c}1' "$MANIFEST" > "$MANIFEST.new" && cat "$MANIFEST.new" > "$MANIFEST"; rm -f "$MANIFEST.new"
+}
+
+# ---- bump ----
+same() { cmp -s "$1" "$2"; }
+merge_skill() { # <name> <path> <base-dir> <theirs-dir>; sets CHANGED, CONFLICTS
+  ours=$ROOT/skills/$1; [ -d "$ours" ] || ours=$ROOT/host/$1
+  CHANGED=0; CONFLICTS=
+  list=$( (cd "$3/$2" 2>/dev/null && find . -type f; cd "$4/$2" 2>/dev/null && find . -type f; cd "$ours" && find . -type f) | sort -u)
+  while IFS= read -r f; do
+    b=$3/$2/$f; t=$4/$2/$f; o=$ours/$f
+    if [ -f "$t" ]; then
+      if [ ! -f "$o" ]; then
+        if [ -f "$b" ] && ! same "$b" "$t"; then CONFLICTS="$CONFLICTS ${f#./}(deleted here, changed upstream)"
+        elif [ ! -f "$b" ]; then mkdir -p "$(dirname "$o")" && cp -p "$t" "$o" && CHANGED=1; fi
+      elif [ -f "$b" ]; then
+        if same "$o" "$t" || same "$b" "$t"; then :
+        elif same "$o" "$b"; then cp -p "$t" "$o" && CHANGED=1
+        else
+          git merge-file -L ours -L "upstream-old" -L "upstream-new" "$o" "$b" "$t" || CONFLICTS="$CONFLICTS ${f#./}"
+          CHANGED=1
+        fi
+      elif ! same "$o" "$t"; then   # added on both sides, differently
+        : > "$TMP/empty"; git merge-file -L ours -L "upstream-old" -L "upstream-new" "$o" "$TMP/empty" "$t" || CONFLICTS="$CONFLICTS ${f#./}"
+        CHANGED=1
+      fi
+    elif [ -f "$o" ] && [ -f "$b" ]; then   # gone upstream
+      if same "$o" "$b"; then rm -f "$o"; CHANGED=1; else CONFLICTS="$CONFLICTS ${f#./}(deleted upstream, edited here)"; fi
+    fi
+  done <<< "$list"
+  find "$ours" -type d -empty -delete 2>/dev/null
+  return 0
+}
+
+bump() { # <name|all> [ref]
+  want=$1; ref=$2; clean=; same_=; conf=; found=0
+  tmpdir
+  while IFS="$TAB" read -r -u 3 name repo path commit; do
+    [ "$want" = all ] || [ "$want" = "$name" ] || continue
+    found=1
+    fetch_repo "$repo"
+    new=$(resolve "$CLONE" "$ref") || { echo "$name: cannot resolve ${ref:-latest} in $repo" >&2; conf="$conf $name"; continue; }
+    if [ "$new" = "$commit" ]; then same_="$same_ $name"; continue; fi
+    rm -rf "${TMP:?}/base" "${TMP:?}/theirs"
+    extract "$CLONE" "$commit" "$path" "$TMP/base" || { echo "$name: base $commit not found" >&2; conf="$conf $name"; continue; }
+    extract "$CLONE" "$new" "$path" "$TMP/theirs" || { echo "$name: $path missing at $new (removed upstream?)" >&2; conf="$conf $name"; continue; }
+    merge_skill "$name" "$path" "$TMP/base" "$TMP/theirs"
+    set_commit "$name" "$new"
+    if [ -n "$CONFLICTS" ]; then conf="$conf $name"; echo "CONFLICT $name ($(echo "$commit" | cut -c1-7)..$(echo "$new" | cut -c1-7)):$CONFLICTS" >&2
+    else clean="$clean $name"; fi
+  done 3< <(tail -n +2 "$MANIFEST")
+  [ $found = 1 ] || die "no manifest row named '$want'"
+  echo "updated cleanly:${clean:- none}"
+  echo "unchanged:${same_:- none}"
+  echo "conflicts:${conf:- none}"
+  [ -z "$conf" ] || { echo "Resolve the <<<<<<< markers, then commit (the manifest already records the new commit)." >&2; return 1; }
+}
+
+# ---- add ----
+add() { # <name> <owner/repo> <path> [ref]
+  [ $# -ge 3 ] || die "usage: refresh --add <name> <owner/repo> <path-in-repo> [ref]"
+  [ ! -e "$ROOT/skills/$1" ] && [ ! -e "$ROOT/host/$1" ] || die "$1 already exists"
+  fetch_repo "$2"
+  sha=$(resolve "$CLONE" "$4") || die "cannot resolve ${4:-latest} in $2"
+  extract "$CLONE" "$sha" "$3" "$TMP/new" || die "$3 not found in $2 at $sha"
+  [ -f "$TMP/new/$3/SKILL.md" ] || die "$3 has no SKILL.md at $sha"
+  grep -qx "name: $1" "$TMP/new/$3/SKILL.md" || die "name in $3/SKILL.md is not '$1'; pass the skill's own name"
+  cp -R "$TMP/new/$3" "$ROOT/skills/$1"
+  printf '%s\t%s\t%s\t%s\n' "$1" "$2" "$3" "$sha" >> "$MANIFEST"
+  check || die "added $1 but the check failed"
+  echo "added $1 from $2 at $sha"
+}
+
+case $1 in
+  --bump) [ $# -ge 2 ] || die "usage: refresh --bump <name|all> [ref]"; check && bump "$2" "$3";;
+  --add) shift; check && add "$@";;
+  '') check || exit 1; link;;
+  *) die "unknown option $1 (see the header of this script)";;
+esac
