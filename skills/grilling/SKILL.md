@@ -21,6 +21,8 @@ Format a round like so:
 ➡️ <your recommended answer>
 ```
 
+If the harness has a structured question tool (Claude Code's `AskUserQuestion`, Pi's `ask_user_question`), ask each round through it instead of the text format, so the user sees the round as one form. Each call takes up to 4 questions with 2-4 options each: one question per frontier item, your recommended option first with "(Recommended)" in its label, context in the option descriptions. A frontier larger than 4 takes several calls. The user can always answer "Other" in free text. Without such a tool, use the text format.
+
 Each round the user answers reshapes the tree: settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round. A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
 
 Finding _facts_ is your job, never the user's. When a frontier question needs a fact from the environment (filesystem, tools, etc.), dispatch a sub-agent to find it; don't ask the user for anything you could look up yourself. Don't block on it: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait for the sub-agent to report; ask the rest of the frontier now. The _decisions_ are the user's: put each to them and wait.
