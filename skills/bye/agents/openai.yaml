@@ -1,0 +1,5 @@
+interface:
+  display_name: "Bye"
+  short_description: "Close or transfer this session's threads"
+policy:
+  allow_implicit_invocation: false

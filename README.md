@@ -37,9 +37,10 @@ scripts/refresh --add <name> <owner/repo> <path-in-repo> [ref]
 
 - `writing-for-agents/SKILL-MECHANICS.md`: a "Procedural anchor" section and a changed intro sentence.
 - `grilling/SKILL.md`: ask each round through the harness's structured question tool when there is one (`AskUserQuestion`, `ask_user_question`).
+- `ask-matt/SKILL.md`, `ask-matt/PHASE-BOUNDARIES.md`: `/handoff` replaced by `/bye` (transfer).
 
 ## Credits
 
-- [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, `licenses/mattpocock-skills.LICENSE`): the `engineering`, `productivity` and `misc` skills at v1.3.1, except `git-guardrails-claude-code`.
+- [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, `licenses/mattpocock-skills.LICENSE`): the `engineering`, `productivity` and `misc` skills at v1.3.1, except `git-guardrails-claude-code` and `handoff` (replaced by `threads` and `bye`).
 - [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT, `licenses/i-have-adhd.LICENSE`): `i-have-adhd`.
 - `show-me` is adapted from [humanlayer/skills](https://github.com/humanlayer/skills): ASCII output in place of Mermaid and HTML.
