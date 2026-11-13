@@ -6,7 +6,7 @@ Tejas's agent skills, and the single source of skills for Claude Code on the hos
 
 ```
 skills/<name>/   every skill for every agent (host and containers), flat
-host/<name>/     Mac-only skills (macos-disk-cleanup, german-shopping-receipts); never mounted into containers
+host/<name>/     Mac-only skills (macos-disk-cleanup, german-shopping-receipts, apple-testflight); never mounted into containers
 manifest.tsv     one row per skill copied from an upstream: name, repo, path, commit
 scripts/refresh  checks the layout, links skills into the agent dirs, bumps and adds upstream skills
 licenses/        upstream licence texts
