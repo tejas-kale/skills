@@ -20,10 +20,7 @@ Steps marked **User** are ones only the user can do: walk them through one at a 
   load. The `.p8` lives only in the login Keychain, item `deepwell.asc-api-key` (base64; a team key despite the name,
   shared by every app). `release.sh` loads both itself.
 - `xcode-select` points at CommandLineTools: prefix `xcodebuild`, `swift build` and `swift test` with
-  `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`. Without it, `swift build` fails on any package whose
-  dependencies use SwiftUI macros, since CommandLineTools does not ship them; run the package tests as
-  `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test`. `python3` on PATH is broken; use
-  `/usr/bin/python3`.
+  `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`. `python3` on PATH is broken; use `/usr/bin/python3`.
 - Signing is automatic. `-allowProvisioningUpdates` makes Xcode create the cloud-managed distribution certificate and
   App Store profiles, so the Keychain needs no distribution certificate. Export signs through the Apple ID in Xcode;
   when `xcodebuild` cannot see it, export fails with "No Accounts" even though Xcode's settings show the account.
