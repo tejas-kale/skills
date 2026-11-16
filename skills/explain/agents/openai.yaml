@@ -1,0 +1,3 @@
+interface:
+  display_name: "Explain"
+  short_description: "Write a self-contained HTML page: explainer, report, options, plan, deck"

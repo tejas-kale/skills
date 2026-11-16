@@ -44,3 +44,4 @@ scripts/refresh --add <name> <owner/repo> <path-in-repo> [ref]
 - [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, `licenses/mattpocock-skills.LICENSE`): the `engineering`, `productivity` and `misc` skills at v1.3.1, except `git-guardrails-claude-code` and `handoff` (replaced by `threads` and `bye`).
 - [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT, `licenses/i-have-adhd.LICENSE`): `i-have-adhd`.
 - `show-me` is adapted from [humanlayer/skills](https://github.com/humanlayer/skills): ASCII output in place of Mermaid and HTML.
+- `explain` takes its idea and its page patterns from [html-effectiveness](https://thariqs.github.io/html-effectiveness/) (Anthropic, Apache-2.0). The template, the scripts and the house style are written here; `PATTERNS.md` links to those examples.
