@@ -10,7 +10,10 @@ host/<name>/     Mac-only skills (macos-disk-cleanup, german-shopping-receipts, 
 manifest.tsv     one row per skill copied from an upstream: name, repo, path, commit
 scripts/refresh  checks the layout, links skills into the agent dirs, bumps and adds upstream skills
 licenses/        upstream licence texts
+global/          my instructions for every agent and project: AGENTS.md, and CLAUDE.md, which imports it
 ```
+
+`global/` is linked by hand, not by `scripts/refresh`: `~/.agents/AGENTS.md` links to `global/AGENTS.md` and `~/.claude/CLAUDE.md` to `global/CLAUDE.md`. Paste `global/AGENTS.md` into the Claude Chat and Cowork instructions after changing it; they cannot read files.
 
 A skill dir holds a `SKILL.md` whose `name:` matches the dir name. A name may exist once across `skills/` and `host/`.
 
