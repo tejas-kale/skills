@@ -14,11 +14,11 @@ How a new book, article, talk or podcast transcript becomes part of the mentor's
 2. **Pick a key.** Two capital letters not yet in the index's key table.
 3. **Write the distillation** in the format below.
 4. **Update the index.** Add the key's row to the key table. For each problem in the index, add the practices that bear on it: under **Also**, or under **First** when one is stronger than a practice already there, keeping **First** at five. Where the new source takes a side in an entry of "Where the books disagree", add it to that side. Where it contradicts the others on a question not yet listed, add a new entry with its **Turns on** line.
-5. **Hand over.**
-   - In Claude Code: write both files under `skills/mentor/references/` in the skills repo and tell the user to commit and push them, then press **Sync now** in the Claude project.
-   - In a Claude project: give the user the new file and the whole updated `index.md`, as files, and tell them to add both to `skills/mentor/references/` in the skills repo, push, and press **Sync now**.
+5. **Save.** The distillation and the index belong in the public repo `tejas-kale/skills`, under `skills/mentor/references/`, never in the mentor repo.
+   - With a checkout of the skills repo you can push to (on the Mac, `~/Code/skills`; in a cloud session, when the user attached it): write both files there, commit with a one-line message and push. On the Mac, the skill is live at once; elsewhere, from the next session.
+   - Without one: give the user the new file and the whole updated `index.md`, as files, and tell them to add both to that folder and push.
 
-**Done when:** the distillation follows the format, every practice in it is reachable from the index or deliberately left out, and the user has the next action for getting both files into the repo.
+**Done when:** the distillation follows the format, every practice in it is reachable from the index or deliberately left out, and both files are pushed to the skills repo, or the user has them with the next action.
 
 ## Format
 
