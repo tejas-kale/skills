@@ -1,8 +1,8 @@
 # Problem index
 
-Maps eight general problems to practices in the eight book files, and records where the books disagree. A pointer such as `DW 7` means practice 7 in `deep-work.md`. The line after a pointer only identifies the practice: open the book file for the action, the numbers and the citation before prescribing.
+Maps eight general problems to practices in the source files, and records where the sources disagree. A pointer such as `DW 7` means practice 7 in `deep-work.md`. The line after a pointer only identifies the practice: open the source file for the action, the numbers and the citation before prescribing. A new source gets a row in the key table and pointers below, by the steps in `sources.md`.
 
-| Key | File | Book |
+| Key | File | Source |
 |---|---|---|
 | DW | `deep-work.md` | Deep Work (Newport) |
 | SG | `so-good-they-cant-ignore-you.md` | So Good They Can't Ignore You (Newport) |
