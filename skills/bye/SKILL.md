@@ -1,6 +1,6 @@
 ---
 name: bye
-description: End the session: close its threads file, or transfer the open threads to a new file for the next session.
+description: "End the session: close its threads file, or transfer the open threads to a new file for the next session."
 disable-model-invocation: true
 ---
 
